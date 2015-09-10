@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load score_tags %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    {{ message_form }}
+    <input type="submit" value="Odeslat">
+  </form>
+
+  {% discussionthread parent_messages %}
+    {% include "parts/message.html" with message=node level=node.level %}
+    {% if not node.is_leaf %}
+      {{ children }}
+    {% endif %}
+  {% enddiscussionthread %}
+{% endblock %}

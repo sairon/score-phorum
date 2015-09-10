@@ -1,17 +1,31 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render, get_object_or_404
+
+from .forms import PublicMessageForm
+from .models import PublicMessage, Room
 
 
-def private_view(request):
-    pass
+def room_view(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
 
+    parent_messages = PublicMessage.objects.filter(room=room) \
+        .prefetch_related('author') \
+        .order_by('tree_id', 'lft')
 
-def room_view(request):
-    return render(request, template_name="")
+    message_form = PublicMessageForm(request.POST or None)
+
+    if request.method == "POST":
+        if message_form.is_valid():
+            message_form.save(author=request.user, room=room)
+            return redirect("room_view", room_id=room.id)
+
+    return render(request, "phorum/room_view.html", {
+        'parent_messages': parent_messages,
+        'message_form': PublicMessageForm(request.POST or None),
+    })
 
 
 def room_list(request):
-    return render(request, template_name="")
-
-
-def delete_message(request):
-    pass
+    rooms = Room.objects.all()
+    return render(request, "phorum/room_list.html", {
+        'rooms': rooms,
+    })

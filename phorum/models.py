@@ -1,11 +1,14 @@
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from mptt.models import MPTTModel, TreeForeignKey
+
+from .managers import PublicMessageQuerySet
 
 
 class User(AbstractUser):
     nickname = models.CharField(max_length=32, unique=True)
-    kredyti = models.IntegerField()
+    kredyti = models.IntegerField(default=0)
     avatar = models.ImageField()
 
 
@@ -24,19 +27,25 @@ class RoomVisit(models.Model):
     visit_time = models.DateTimeField(auto_now=True)
 
 
-class Message(models.Model):
+class Message(MPTTModel):
     author = models.ForeignKey(User)
     text = models.TextField()
-    parent = models.ForeignKey("self")
+    parent = TreeForeignKey("self", null=True, blank=True, db_index=True,
+                            related_name="children")
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
 
+    class MPTTMeta:
+        order_insertion_by = ['-created']
+
 
 class PublicMessage(Message):
+    objects = PublicMessageQuerySet.as_manager()
+
     room = models.ForeignKey(Room)
 
 
 class PrivateMessage(Message):
-    recipient = models.ForeignKey(User)
+    recipient = models.ForeignKey(User, related_name="received_message")

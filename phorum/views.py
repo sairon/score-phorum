@@ -22,7 +22,7 @@ def room_view(request, room_id):
     paginator = Paginator(root_messages, 10)
     current_page = paginator.page(page_number)
 
-    messages = PublicMessage.objects.filter(tree_id__in=current_page.object_list) \
+    threads = PublicMessage.objects.filter(tree_id__in=current_page.object_list) \
         .prefetch_related('author')
 
     message_form = PublicMessageForm(request.POST or None)
@@ -34,7 +34,7 @@ def room_view(request, room_id):
 
     return render(request, "phorum/room_view.html", {
         'pagination': current_page,
-        'messages': messages,
+        'threads': threads,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),
     })

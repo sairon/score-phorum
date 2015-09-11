@@ -20,6 +20,8 @@
     <a href="{% url "logout" %}">Logout</a>
   {% endif %}
 
+  {% include "snippets/messages.html" with messages=messages only %}
+
   {% block content %}{% endblock %}
 </body>
 </html>

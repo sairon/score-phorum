@@ -6,8 +6,11 @@ from .models import PublicMessage
 
 class PublicMessageForm(forms.ModelForm):
     class Meta:
-        fields = ('text',)
+        fields = ('text', 'parent')
         model = PublicMessage
+        widgets = {
+            'parent': forms.TextInput  # TODO: JS populated HiddenInput
+        }
 
     def save(self, commit=True, author=None, room=None):
         message = super(PublicMessageForm, self).save(False)

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 from .models import PublicMessage
 
@@ -18,3 +19,7 @@ class PublicMessageForm(forms.ModelForm):
         if commit:
             message.save()
         return message
+
+
+class LoginForm(AuthenticationForm):
+    pass

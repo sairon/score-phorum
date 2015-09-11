@@ -8,6 +8,18 @@
     <![endif]-->
 </head>
 <body>
+  {% if request.user.is_anonymous %}
+    <form action="{% url "login" %}" method="post">
+      {% csrf_token %}
+      {{ login_form }}
+      <input type="submit" value="Login">
+    </form>
+  {% else %}
+    Logged in as {{ request.user.nickname }}
+    |
+    <a href="{% url "logout" %}">Logout</a>
+  {% endif %}
+
   {% block content %}{% endblock %}
 </body>
 </html>

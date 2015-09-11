@@ -1,7 +1,11 @@
+# coding=utf-8
+from django.contrib import messages
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 
-from .forms import PublicMessageForm
+from .forms import LoginForm, PublicMessageForm
 from .models import PublicMessage, Room
 
 
@@ -32,6 +36,7 @@ def room_view(request, room_id):
         'pagination': current_page,
         'messages': messages,
         'message_form': PublicMessageForm(request.POST or None),
+        'login_form': LoginForm(),
     })
 
 
@@ -39,4 +44,21 @@ def room_list(request):
     rooms = Room.objects.all()
     return render(request, "phorum/room_list.html", {
         'rooms': rooms,
+        'login_form': LoginForm(),
     })
+
+
+def login(request):
+    if request.method == "POST":
+        form = LoginForm(request, data=request.POST)
+        if form.is_valid():
+            auth_login(request, form.get_user())
+        else:
+            messages.error(request, "Neplatný login nebo heslo.")
+
+    return redirect("home")
+
+
+def logout(request):
+    auth_logout(request)
+    return redirect("home")

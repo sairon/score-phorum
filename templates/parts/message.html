@@ -1,0 +1,6 @@
+{% if message.level > 0 %}<b>reply:</b>{% endif %}
+<div>id: {{ message.id }}</div>
+<div>from: {{ message.author.nickname }}</div>
+<div>to: {{ message.parent.author.nickname }} (#{{ message.parent.id }})</div>
+<pre>{{ message.text }}</pre>
+<hr>

@@ -5,7 +5,7 @@
     <tbody>
       {% for room in rooms %}
         <tr>
-          <td><a href="{% url "room_view" room=room.pk %}">{{ room.name }}</a></td>
+          <td><a href="{% url "room_view" room_id=room.pk %}">{{ room.name }}</a></td>
           <td>{{ room.publicmessage_set.unread }}/{{ room.publicmessage_set.count }}</td>
           <td>{{ room.publicmessage_set.last_message.created }}</td>
         </tr>

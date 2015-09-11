@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import redirect, render, get_object_or_404
 
 from .forms import LoginForm, PublicMessageForm
-from .models import PublicMessage, Room
+from .models import PublicMessage, Room, RoomVisit
 
 
 def room_view(request, room_id):
@@ -27,10 +27,16 @@ def room_view(request, room_id):
 
     message_form = PublicMessageForm(request.POST or None)
 
-    if request.method == "POST":
-        if message_form.is_valid():
-            message_form.save(author=request.user, room=room)
-            return redirect("room_view", room_id=room.id)
+    if request.user.is_authenticated():
+        visit, created = RoomVisit.objects.get_or_create(user=request.user, room=room)
+        if not created:
+            # just update the time
+            visit.save()
+
+        if request.method == "POST":
+            if message_form.is_valid():
+                message_form.save(author=request.user, room=room)
+                return redirect("room_view", room_id=room.id)
 
     return render(request, "phorum/room_view.html", {
         'pagination': current_page,

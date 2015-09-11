@@ -16,6 +16,7 @@ class Room(models.Model):
     name = models.CharField(max_length=64, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     password = models.CharField(max_length=128, blank=True)
+    visits = models.ManyToManyField(User, through="RoomVisit")
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)

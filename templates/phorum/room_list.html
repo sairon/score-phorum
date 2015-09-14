@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load score_tags %}
 
 {% block content %}
   <table>
@@ -6,8 +7,11 @@
       {% for room in rooms %}
         <tr>
           <td><a href="{% url "room_view" room_id=room.pk %}">{{ room.name }}</a></td>
-          <td>{{ room.publicmessage_set.unread }}/{{ room.publicmessage_set.count }}</td>
-          <td>{{ room.publicmessage_set.last_message.created }}</td>
+          <td>
+            {% if request.user.is_authenticated %}{% new_posts room visits %} /{% endif %}
+            {{ room.total_messages }}
+          </td>
+          <td>{{ room.last_message_time}}</td>
         </tr>
       {% endfor %}
     </tbody>

@@ -1,5 +1,6 @@
 import warnings
 from django import template
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -122,3 +123,8 @@ def discussionthread(parser, token):
     parser.delete_first_token()
 
     return DiscussionThreadNode(template_nodes, queryset_var)
+
+
+@register.simple_tag
+def new_posts(room, visits):
+    return escape(visits.get(room.id, room.total_messages))

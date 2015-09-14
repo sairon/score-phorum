@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
+from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
 
 from .forms import LoginForm, PublicMessageForm
@@ -47,10 +48,25 @@ def room_view(request, room_id):
 
 
 def room_list(request):
-    rooms = Room.objects.all()
+    rooms = Room.objects.annotate(total_messages=Count("publicmessage"),
+                                  last_message_time=Max("publicmessage__created"))
+
+    visits = None
+    if request.user.is_authenticated():
+        visits = RoomVisit.objects.filter(user=request.user).extra(
+            select={
+                'new_messages': 'SELECT COUNT(*) FROM "phorum_publicmessage" '
+                                'WHERE "phorum_publicmessage"."created" > "phorum_roomvisit"."visit_time" '
+                                'AND "phorum_publicmessage"."room_id" = "phorum_roomvisit"."room_id"'
+            }
+        ) \
+            .values_list("room", "new_messages")
+        visits = dict(visits)
+
     return render(request, "phorum/room_list.html", {
         'rooms': rooms,
         'login_form': LoginForm(),
+        'visits': visits,
     })
 
 

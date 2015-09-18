@@ -10,8 +10,8 @@ from .forms import LoginForm, PublicMessageForm
 from .models import PublicMessage, Room, RoomVisit
 
 
-def room_view(request, room_id):
-    room = get_object_or_404(Room, id=room_id)
+def room_view(request, room_slug):
+    room = get_object_or_404(Room, slug=room_slug)
 
     page_number = request.GET.get("page", 1)
 
@@ -37,7 +37,7 @@ def room_view(request, room_id):
         if request.method == "POST":
             if message_form.is_valid():
                 message_form.save(author=request.user, room=room)
-                return redirect("room_view", room_id=room.id)
+                return redirect("room_view", room_slug=room.slug)
 
     return render(request, "phorum/room_view.html", {
         'pagination': current_page,

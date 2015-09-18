@@ -19,7 +19,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'phorum.views.room_list', name="home"),
-    url(r'^room/(?P<room_id>\d+)$', 'phorum.views.room_view', name="room_view"),
+    url(r'^room/(?P<room_slug>.+)/$', 'phorum.views.room_view', name="room_view"),
     url(r'^login$', 'phorum.views.login', name="login"),
     url(r'^logout$', 'phorum.views.logout', name="logout"),
 ]

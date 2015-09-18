@@ -1,3 +1,4 @@
+from autoslug.fields import AutoSlugField
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -14,9 +15,13 @@ class User(AbstractUser):
 
 class Room(models.Model):
     name = models.CharField(max_length=64, unique=True)
+    slug = AutoSlugField(populate_from='name')
+    author = models.ForeignKey(User, related_name="created_rooms", null=True, blank=True)
+    moderator = models.ForeignKey(User, related_name="moderated_rooms", null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     password = models.CharField(max_length=128, blank=True)
     visits = models.ManyToManyField(User, through="RoomVisit")
+    pinned = models.BooleanField(default=False)
 
     def set_password(self, raw_password):
         self.password = make_password(raw_password)

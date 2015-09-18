@@ -6,7 +6,7 @@
     <tbody>
       {% for room in rooms %}
         <tr>
-          <td><a href="{% url "room_view" room_id=room.pk %}">{{ room.name }}</a></td>
+          <td><a href="{% url "room_view" room_slug=room.slug %}">{{ room.name }}</a></td>
           <td>
             {% if request.user.is_authenticated %}{% new_posts room visits %} /{% endif %}
             {{ room.total_messages }}

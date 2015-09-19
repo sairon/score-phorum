@@ -28,7 +28,8 @@ class User(AbstractBaseUser, PermissionsMixin):
                                                 'active. Unselect this instead of deleting accounts.'))
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
-    kredyti = models.IntegerField(default=0)
+    kredyti = models.PositiveIntegerField(default=0)
+    level_override = models.PositiveSmallIntegerField(null=True, blank=True)
     motto = models.CharField(max_length=64, blank=True)
     avatar = models.ImageField(upload_to="avatars", blank=True)
 
@@ -47,6 +48,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+    def level(self):
+        if self.level_override is not None:
+            return self.level_override
+
+        if self.kredyti > 35000:
+            return 8
+        elif self.kredyti > 20000:
+            return 7
+        elif self.kredyti > 10000:
+            return 6
+        elif self.kredyti > 6000:
+            return 5
+        elif self.kredyti > 3000:
+            return 4
+        elif self.kredyti > 1100:
+            return 3
+        elif self.kredyti > 400:
+            return 2
+        elif self.kredyti > 150:
+            return 1
+        return 0
 
 
 class Room(models.Model):

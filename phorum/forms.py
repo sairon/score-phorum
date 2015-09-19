@@ -1,7 +1,11 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    UserChangeForm as DefaultUserChangeForm,
+    UserCreationForm as DefaultUserCreationForm
+)
 
-from .models import PublicMessage
+from .models import PublicMessage, User
 
 
 class PublicMessageForm(forms.ModelForm):
@@ -31,3 +35,13 @@ class PublicMessageForm(forms.ModelForm):
 
 class LoginForm(AuthenticationForm):
     pass
+
+
+class UserChangeForm(DefaultUserChangeForm):
+    class Meta(DefaultUserChangeForm.Meta):
+        model = User
+
+
+class UserCreationForm(DefaultUserCreationForm):
+    class Meta(DefaultUserCreationForm.Meta):
+        model = User

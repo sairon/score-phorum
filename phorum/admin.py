@@ -1,29 +1,26 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
-from django.contrib.auth.forms import UserChangeForm as DefaultUserChangeForm
 from django.utils.translation import ugettext_lazy as _
 
+from .forms import UserChangeForm
 from .models import User
-
-
-class UserChangeForm(DefaultUserChangeForm):
-    class Meta(DefaultUserChangeForm.Meta):
-        model = User
 
 
 class UserAdmin(DefaultUserAdmin):
     form = UserChangeForm
 
+    list_display = ('username', 'email', 'is_staff')
+
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'nickname', 'password1', 'password2'),
+            'fields': ('username', 'password1', 'password2'),
         }),
     )
 
     fieldsets = (
-        (None, {'fields': ('username', 'nickname', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        (None, {'fields': ('username', 'password')}),
+        (_('Personal info'), {'fields': ('email', 'kredyti', 'motto')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),

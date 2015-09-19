@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^room/(?P<room_slug>.+)/$', 'phorum.views.room_view', name="room_view"),
     url(r'^login$', 'phorum.views.login', name="login"),
     url(r'^logout$', 'phorum.views.logout', name="logout"),
+    url(r'^user/new', 'phorum.views.user_new', name="user_new"),
 ]

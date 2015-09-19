@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
 
-from .forms import LoginForm, PublicMessageForm
+from .forms import LoginForm, PublicMessageForm, UserCreationForm
 from .models import PublicMessage, Room, RoomVisit
 
 
@@ -80,3 +80,17 @@ def login(request):
 def logout(request):
     auth_logout(request)
     return redirect("home")
+
+
+def user_new(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Uživatel vytvořen, nyní se můžete přihlásit.")
+            return redirect("home")
+
+    return render(request, "phorum/user_new.html", {
+        'form': form
+    })

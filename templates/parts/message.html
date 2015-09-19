@@ -1,7 +1,7 @@
 {% if message.thread %}<b>reply:</b>{% else %}last reply: {{ message.last_reply }}{% endif %}
 <div>id: {{ message.id }}</div>
-<div>from: {{ message.author.nickname }}</div>
-<div>to: {% if message.recipient %}{{ message.recipient.nickname }}{% else %}all{% endif %}</div>
+<div>from: {{ message.author.username }}</div>
+<div>to: {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
 <div>{{ message.created }}</div>
 <pre>{{ message.text }}</pre>
 <hr>

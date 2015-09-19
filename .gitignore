@@ -1,4 +1,4 @@
 *.py[cod]
-*.sassc
+*.s[ac]ssc
 /media/*
 local_settings.json

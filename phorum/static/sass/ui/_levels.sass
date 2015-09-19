@@ -1,0 +1,14 @@
+%level
+  width: 40px
+  height: 5px
+  margin-top: -1px
+
+@for $i from 0 through 8
+  .level-#{$i}
+    @extend %level
+    background-image: inline_image("levels/l#{$i}.gif")
+
+@for $i from 15 through 16
+  .level-#{$i}
+    @extend %level
+    background-image: inline_image("levels/l#{$i}.gif")

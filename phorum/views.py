@@ -26,9 +26,11 @@ def room_view(request, room_slug):
 
     message_form = PublicMessageForm(request.POST or None)
 
+    last_visit_time = None
     if request.user.is_authenticated():
         visit, created = RoomVisit.objects.get_or_create(user=request.user, room=room)
         if not created:
+            last_visit_time = visit.visit_time
             # just update the time
             visit.save()
 
@@ -39,6 +41,7 @@ def room_view(request, room_slug):
 
     return render(request, "phorum/room_view.html", {
         'threads': threads,
+        'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),
     })

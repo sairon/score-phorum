@@ -5,18 +5,23 @@ from .models import PublicMessage
 
 
 class PublicMessageForm(forms.ModelForm):
+    parent = forms.IntegerField(required=False, widget=forms.TextInput)  # TODO: JS populated HiddenInput
+
     class Meta:
-        fields = ('text', 'parent')
+        fields = ('text', )
         model = PublicMessage
-        widgets = {
-            'parent': forms.TextInput  # TODO: JS populated HiddenInput
-        }
 
     def save(self, commit=True, author=None, room=None):
         message = super(PublicMessageForm, self).save(False)
         message.author = author
-        if message.parent:
-            message.room = message.parent.room
+        parent_id = self.cleaned_data.get("parent")
+        if parent_id:
+            ancestor = PublicMessage.objects.get(pk=parent_id)
+            # if the sent message is a reply, then ancestor's thread_id
+            # contains the root node's PK, otherwise it's simply PK of ancestor
+            message.thread_id = ancestor.thread_id or ancestor.pk
+            message.recipient = ancestor.author
+            message.room = ancestor.room
         else:
             message.room = room
         if commit:

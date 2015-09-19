@@ -8,26 +8,23 @@
     <input type="submit" value="Odeslat">
   </form>
 
-  {% discussionthread threads %}
-    {% include "parts/message.html" with message=node level=node.level %}
-    {% if not node.is_leaf %}
-      {{ children }}
-    {% endif %}
-  {% enddiscussionthread %}
+  {% for thread in threads %}
+    {% include "parts/message.html" with message=thread %}
+  {% endfor %}
 
 
   <div class="pagination">
     <span class="step-links">
-      {% if pagination.has_previous %}
-        <a href="?page={{ pagination.previous_page_number }}">previous</a>
+      {% if threads.has_previous %}
+        <a href="?page={{ threads.previous_page_number }}">previous</a>
       {% endif %}
 
       <span class="current">
-        Page {{ pagination.number }} of {{ pagination.paginator.num_pages }}.
+        Page {{ threads.number }} of {{ threads.paginator.num_pages }}.
       </span>
 
-      {% if pagination.has_next %}
-        <a href="?page={{ pagination.next_page_number }}">next</a>
+      {% if threads.has_next %}
+        <a href="?page={{ threads.next_page_number }}">next</a>
       {% endif %}
     </span>
   </div>

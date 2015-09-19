@@ -1,6 +1,13 @@
-{% if message.level > 0 %}<b>reply:</b>{% endif %}
+{% if message.thread %}<b>reply:</b>{% else %}last reply: {{ message.last_reply }}{% endif %}
 <div>id: {{ message.id }}</div>
 <div>from: {{ message.author.nickname }}</div>
-<div>to: {{ message.parent.author.nickname }} (#{{ message.parent.id }})</div>
+<div>to: {% if message.recipient %}{{ message.recipient.nickname }}{% else %}all{% endif %}</div>
+<div>{{ message.created }}</div>
 <pre>{{ message.text }}</pre>
 <hr>
+
+{% if not message.thread %}
+  {% for child_message in message.children.all %}
+    {% include "parts/message.html" with message=child_message%}
+  {% endfor %}
+{% endif %}

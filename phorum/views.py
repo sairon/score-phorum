@@ -15,16 +15,13 @@ def room_view(request, room_slug):
 
     page_number = request.GET.get("page", 1)
 
-    root_messages = PublicMessage.objects.filter(room=room) \
-        .filter(parent=None)\
-        .order_by('-created')\
-        .values_list("tree_id", flat=True)
+    threads = PublicMessage.objects\
+        .filter(room=room, thread=None) \
+        .order_by("-last_reply") \
+        .prefetch_related("author", "children__author", "children__recipient")
 
-    paginator = Paginator(root_messages, 10)
-    current_page = paginator.page(page_number)
-
-    threads = PublicMessage.objects.filter(tree_id__in=current_page.object_list) \
-        .prefetch_related('author')
+    paginator = Paginator(threads, 10)
+    threads = paginator.page(page_number)
 
     message_form = PublicMessageForm(request.POST or None)
 
@@ -40,7 +37,6 @@ def room_view(request, room_slug):
                 return redirect("room_view", room_slug=room.slug)
 
     return render(request, "phorum/room_view.html", {
-        'pagination': current_page,
         'threads': threads,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),

@@ -2,9 +2,6 @@ from autoslug.fields import AutoSlugField
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from mptt.models import MPTTModel, TreeForeignKey
-
-from .managers import PublicMessageQuerySet
 
 
 class User(AbstractUser):
@@ -33,25 +30,34 @@ class RoomVisit(models.Model):
     visit_time = models.DateTimeField(auto_now=True)
 
 
-class Message(MPTTModel):
-    author = models.ForeignKey(User)
+class Message(models.Model):
+    thread = models.ForeignKey("self", null=True, blank=True, db_index=True,
+                               related_name="children")
+    author = models.ForeignKey(User, related_name="posted_%(class)s")
+    recipient = models.ForeignKey(User, related_name="received_%(class)s", blank=True, null=True)
     text = models.TextField()
-    parent = TreeForeignKey("self", null=True, blank=True, db_index=True,
-                            related_name="children")
     created = models.DateTimeField(auto_now_add=True)
+    last_reply = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         abstract = True
-
-    class MPTTMeta:
-        order_insertion_by = ['-created']
+        ordering = ['created']
 
 
 class PublicMessage(Message):
-    objects = PublicMessageQuerySet.as_manager()
-
     room = models.ForeignKey(Room)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and not self.thread:
+            self.last_reply = self.created
+        super(PublicMessage, self).save(*args, **kwargs)
+        if self.thread:
+            # update last_reply on parent
+            root = PublicMessage.objects.get(pk=self.thread.pk)
+            root.last_reply = self.created
+            root.save()
+        return self
 
 
 class PrivateMessage(Message):
-    recipient = models.ForeignKey(User, related_name="received_message")
+    pass

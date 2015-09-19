@@ -30,7 +30,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     kredyti = models.IntegerField(default=0)
     motto = models.CharField(max_length=64, blank=True)
-    avatar = models.ImageField()
+    avatar = models.ImageField(upload_to="avatars", blank=True)
 
     class Meta:
         verbose_name = _('user')

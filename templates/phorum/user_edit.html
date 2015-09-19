@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <form action="{% url "user_edit" %}" method="post" enctype="multipart/form-data">
+    <table>
+      {{ form }}
+      <tr>
+        <th></th>
+        <td>
+          <input type="submit" value="Upravit">
+          {% csrf_token %}
+        </td>
+      </tr>
+    </table>
+  </form>
+{% endblock %}

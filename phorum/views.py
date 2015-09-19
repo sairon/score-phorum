@@ -1,12 +1,13 @@
 # coding=utf-8
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
 from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
 
-from .forms import LoginForm, PublicMessageForm, UserCreationForm
+from .forms import LoginForm, PublicMessageForm, UserCreationForm, UserChangeForm
 from .models import PublicMessage, Room, RoomVisit
 
 
@@ -92,5 +93,21 @@ def user_new(request):
             return redirect("home")
 
     return render(request, "phorum/user_new.html", {
+        'form': form
+    })
+
+
+@login_required
+def user_edit(request):
+    form = UserChangeForm(request.POST or None, request.FILES or None,
+                          instance=request.user)
+
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.info(request, "Profil uživatele upraven.")
+            return redirect("user_edit")
+
+    return render(request, "phorum/user_edit.html", {
         'form': form
     })

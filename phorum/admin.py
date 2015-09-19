@@ -3,7 +3,11 @@ from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
 from django.utils.translation import ugettext_lazy as _
 
 from .forms import AdminUserChangeForm
-from .models import User
+from .models import Room, User
+
+
+class RoomAdmin(admin.ModelAdmin):
+    list_display = ('name', 'pinned', 'created')
 
 
 class UserAdmin(DefaultUserAdmin):
@@ -27,4 +31,5 @@ class UserAdmin(DefaultUserAdmin):
     )
 
 
+admin.site.register(Room, RoomAdmin)
 admin.site.register(User, UserAdmin)

@@ -59,6 +59,12 @@ class Room(models.Model):
     visits = models.ManyToManyField(User, through="RoomVisit")
     pinned = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ('-pinned', 'name')
+
+    def __unicode__(self):
+        return self.name
+
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 

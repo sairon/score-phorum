@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_bleach',
     'phorum',
 )
 
@@ -149,3 +150,13 @@ LOGGING = {
     }
 }
 
+
+BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'font', 'br', 'img']
+BLEACH_ALLOWED_ATTRIBUTES = ['href', 'title', 'style', 'color', 'src']
+
+BLEACH_ALLOWED_STYLES = [
+    'font-family', 'font-weight', 'text-decoration', 'font-variant'
+]
+
+BLEACH_STRIP_TAGS = False
+BLEACH_STRIP_COMMENTS = True

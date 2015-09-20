@@ -1,4 +1,4 @@
-{% load static %}<div class="message{% if message.thread %} reply{% endif %}">
+{% load bleach_tags %}{% load static %}<div class="message{% if message.thread %} reply{% endif %}">
   <div class="header">
     <div class="flags">
       {% if request.user.is_authenticated %}
@@ -7,8 +7,8 @@
       {% endif %}
     </div>
     <div class="meta">
-      <div class="author">od: {{ message.author.username }}</div>
-      <div class="recipient">pro: {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
+      <div class="author"><b>od:</b> {{ message.author.username }}</div>
+      <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
       <div class="time">{{ message.created|date:"d.m. H:i" }}</div>
     </div>
   </div>
@@ -16,7 +16,7 @@
     <img src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
   </div>
-  <div class="text">{{ message.text }}</div>
+  <div class="text">{{ message.text|bleach }}</div>
 </div>
 
 {% if not message.thread %}

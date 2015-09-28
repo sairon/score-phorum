@@ -42,7 +42,8 @@ class AvatarImageField(forms.ImageField):
 
 
 class PublicMessageForm(forms.ModelForm):
-    parent = forms.IntegerField(required=False, widget=forms.TextInput)  # TODO: JS populated HiddenInput
+    thread_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
+    recipient = forms.CharField(required=False)
 
     class Meta:
         fields = ('text', )
@@ -51,16 +52,20 @@ class PublicMessageForm(forms.ModelForm):
     def save(self, commit=True, author=None, room=None):
         message = super(PublicMessageForm, self).save(False)
         message.author = author
-        parent_id = self.cleaned_data.get("parent")
-        if parent_id:
-            ancestor = PublicMessage.objects.get(pk=parent_id)
-            # if the sent message is a reply, then ancestor's thread_id
-            # contains the root node's PK, otherwise it's simply PK of ancestor
-            message.thread_id = ancestor.thread_id or ancestor.pk
-            message.recipient = ancestor.author
-            message.room = ancestor.room
-        else:
-            message.room = room
+        message.room = room
+        recipient_name = self.cleaned_data.get("recipient") or None
+        recipient = None
+        try:
+            recipient = User.objects.get(username=recipient_name)
+        except User.DoesNotExist:
+            if recipient_name is not None:
+                raise forms.ValidationError("Uživatel s přezdívkou '%s' neexistuje.")
+
+        message.recipient = recipient
+
+        thread_id = self.cleaned_data.get("thread_id")
+        if thread_id:
+            message.thread_id = thread_id
         if commit:
             message.save()
         return message

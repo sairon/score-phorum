@@ -3,7 +3,7 @@
 
 {% block content %}
   {% if request.user.is_anonymous %}
-      <form action="{% url "login" %}" method="post">
+    <form action="{% url "login" %}" method="post">
       {% csrf_token %}
       {{ login_form }}
       <input type="submit" value="Login">

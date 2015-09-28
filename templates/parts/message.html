@@ -1,9 +1,12 @@
-{% load bleach_tags %}{% load static %}<div class="message{% if message.thread %} reply{% endif %}">
+{% load bleach_tags %}
+{% load static %}
+
+<div class="message{% if message.thread %} reply{% endif %}" data-thread-id="{{ message.thread_reply_id }}" data-author-id="{{ message.author.pk }}" data-author="{{ message.author.username }}">
   <div class="header">
     <div class="flags">
       {% if request.user.is_authenticated %}
         {% if not last_visit_time or message.created > last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
-        <img src="{% static "img/message-icon.gif" %}">
+        <img src="{% static "img/message-icon.gif" %}" class="send-reply">
       {% endif %}
     </div>
     <div class="meta">
@@ -12,7 +15,7 @@
       <div class="time">{{ message.created|date:"d.m. H:i" }}</div>
     </div>
   </div>
-  <div class="avatar">
+  <div class="avatar send-reply">
     <img src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
   </div>

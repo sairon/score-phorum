@@ -111,6 +111,10 @@ class Message(models.Model):
         abstract = True
         ordering = ['created']
 
+    @property
+    def thread_reply_id(self):
+        return self.thread_id or self.pk
+
 
 class PublicMessage(Message):
     room = models.ForeignKey(Room)

@@ -98,6 +98,13 @@ class RoomVisit(models.Model):
     visit_time = models.DateTimeField(auto_now=True)
 
 
+class LastReplyField(models.DateTimeField):
+    def pre_save(self, model_instance, add):
+        if not model_instance.pk and not model_instance.thread:
+            return model_instance.created
+        return super(LastReplyField, self).pre_save(model_instance, add)
+
+
 class Message(models.Model):
     thread = models.ForeignKey("self", null=True, blank=True, db_index=True,
                                related_name="children")
@@ -105,7 +112,7 @@ class Message(models.Model):
     recipient = models.ForeignKey(User, related_name="received_%(class)s", blank=True, null=True)
     text = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
-    last_reply = models.DateTimeField(null=True, blank=True)
+    last_reply = LastReplyField(null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -120,8 +127,6 @@ class PublicMessage(Message):
     room = models.ForeignKey(Room)
 
     def save(self, *args, **kwargs):
-        if not self.pk and not self.thread:
-            self.last_reply = self.created
         super(PublicMessage, self).save(*args, **kwargs)
         if self.thread:
             # update last_reply on parent

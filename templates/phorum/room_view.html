@@ -8,13 +8,13 @@
       {{ login_form }}
       <input type="submit" value="Login">
     </form>
+  {% else %}
+    <form action="" method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ message_form }}
+      <input type="submit" value="Odeslat">
+    </form>
   {% endif %}
-
-  <form action="" method="post" autocomplete="off">
-    {% csrf_token %}
-    {{ message_form }}
-    <input type="submit" value="Odeslat">
-  </form>
 
   {% for thread in threads %}
     {% include "parts/message.html" with message=thread %}

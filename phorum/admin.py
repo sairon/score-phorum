@@ -14,6 +14,7 @@ class UserAdmin(DefaultUserAdmin):
     form = AdminUserChangeForm
 
     list_display = ('username', 'email', 'is_staff')
+    search_fields = ('username', 'email')
 
     add_fieldsets = (
         (None, {

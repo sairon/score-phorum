@@ -42,30 +42,31 @@ class AvatarImageField(forms.ImageField):
 
 
 class PublicMessageForm(forms.ModelForm):
-    thread_id = forms.IntegerField(required=False, widget=forms.HiddenInput)
     recipient = forms.CharField(required=False)
 
     class Meta:
-        fields = ('text', )
+        fields = ('text', 'thread', 'recipient')
         model = PublicMessage
+        widgets = {
+            'thread': forms.HiddenInput,
+            'recipient': forms.TextInput,
+        }
 
-    def save(self, commit=True, author=None, room=None):
-        message = super(PublicMessageForm, self).save(False)
-        message.author = author
-        message.room = room
+    def clean_recipient(self):
         recipient_name = self.cleaned_data.get("recipient") or None
         recipient = None
         try:
             recipient = User.objects.get(username=recipient_name)
         except User.DoesNotExist:
             if recipient_name is not None:
-                raise forms.ValidationError("Uživatel s přezdívkou '%s' neexistuje.")
+                raise forms.ValidationError(u"Uživatel s přezdívkou '%s' neexistuje." % recipient_name)
+        return recipient
 
-        message.recipient = recipient
+    def save(self, commit=True, author=None, room=None):
+        message = super(PublicMessageForm, self).save(False)
+        message.author = author
+        message.room = room
 
-        thread_id = self.cleaned_data.get("thread_id")
-        if thread_id:
-            message.thread_id = thread_id
         if commit:
             message.save()
         return message

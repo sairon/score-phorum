@@ -1,5 +1,4 @@
-{% load bleach_tags %}
-{% load static %}
+{% load bleach_tags score_tags static %}
 
 <div class="message{% if message.thread %} reply{% endif %}" data-thread-id="{{ message.thread_reply_id }}" data-author-id="{{ message.author.pk }}" data-author="{{ message.author.username }}">
   <div class="header">
@@ -10,7 +9,12 @@
       {% endif %}
     </div>
     <div class="meta">
-      <div class="author"><b>od:</b> {{ message.author.username }}</div>
+      <div class="author">
+        <b>od:</b> {{ message.author.username }}
+        {% if message|can_be_deleted_by:request.user %}
+          - <a href="{% url "message_delete" message_id=message.id %}">smaž</a>
+        {% endif %}
+      </div>
       <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
       <div class="time">{{ message.created|date:"d.m. H:i" }}</div>
     </div>

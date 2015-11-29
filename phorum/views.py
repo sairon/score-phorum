@@ -70,6 +70,19 @@ def room_list(request):
     })
 
 
+def message_delete(request, message_id):
+    message = get_object_or_404(PublicMessage, pk=message_id)
+    message_room_slug = message.room.slug
+
+    if message.can_be_deleted_by(request.user):
+        message.delete()
+        messages.info(request, "Zpráva byla smazána.")
+        return redirect("room_view", room_slug=message_room_slug)
+    else:
+        messages.error(request, "Nemáte oprávnění ke smazání zprávy.")
+        return redirect("room_view", room_slug=message_room_slug)
+
+
 def login(request):
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)

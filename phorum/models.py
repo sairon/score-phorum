@@ -15,6 +15,34 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
 
+    LEVEL_GREEN = 0
+    LEVEL_YELLOW = 1
+    LEVEL_ORANGE = 2
+    LEVEL_RED = 3
+    LEVEL_CRIMSON = 4
+    LEVEL_1_DOT = 5
+    LEVEL_2_DOTS = 6
+    LEVEL_3_DOTS = 7
+    LEVEL_GOD = 8
+    LEVEL_ADMIN = 15
+    LEVEL_EDITOR = 16
+    LEVEL_DEV = 99
+
+    LEVELS = (
+        (LEVEL_GREEN, "Green ribbon"),
+        (LEVEL_YELLOW, "Yellow ribbon"),
+        (LEVEL_ORANGE, "Orange ribbon"),
+        (LEVEL_RED, "Red ribbon"),
+        (LEVEL_CRIMSON, "Crimson ribbon"),
+        (LEVEL_1_DOT, "1 dot"),
+        (LEVEL_2_DOTS, "2 dots"),
+        (LEVEL_3_DOTS, "3 dots"),
+        (LEVEL_GOD, "God"),
+        (LEVEL_ADMIN, "Admin"),
+        (LEVEL_EDITOR, "Editor"),
+        (LEVEL_DEV, "Dev"),
+    )
+
     username = models.CharField(max_length=32, unique=True, error_messages={
             'unique': _("A user with that username already exists."),
         })
@@ -29,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
 
     kredyti = models.PositiveIntegerField(default=0)
-    level_override = models.PositiveSmallIntegerField(null=True, blank=True)
+    level_override = models.PositiveSmallIntegerField(null=True, blank=True, choices=LEVELS)
     motto = models.CharField(max_length=64, blank=True)
     avatar = models.ImageField(upload_to="avatars", blank=True)
 
@@ -49,27 +77,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
+    @property
     def level(self):
         if self.level_override is not None:
             return self.level_override
 
         if self.kredyti > 35000:
-            return 8
+            return User.LEVEL_GOD
         elif self.kredyti > 20000:
-            return 7
+            return User.LEVEL_3_DOTS
         elif self.kredyti > 10000:
-            return 6
+            return User.LEVEL_2_DOTS
         elif self.kredyti > 6000:
-            return 5
+            return User.LEVEL_1_DOT
         elif self.kredyti > 3000:
-            return 4
+            return User.LEVEL_CRIMSON
         elif self.kredyti > 1100:
-            return 3
+            return User.LEVEL_RED
         elif self.kredyti > 400:
-            return 2
+            return User.LEVEL_ORANGE
         elif self.kredyti > 150:
-            return 1
-        return 0
+            return User.LEVEL_YELLOW
+        return User.LEVEL_GREEN
 
 
 class Room(models.Model):
@@ -122,6 +151,13 @@ class Message(models.Model):
     def thread_reply_id(self):
         return self.thread_id or self.pk
 
+    def can_be_deleted_by(self, user):
+        if not user.is_authenticated():
+            return False
+        if self.author == user:
+            return True
+        return None
+
 
 class PublicMessage(Message):
     room = models.ForeignKey(Room)
@@ -134,6 +170,17 @@ class PublicMessage(Message):
             root.last_reply = self.created
             root.save()
         return self
+
+    def can_be_deleted_by(self, user):
+        can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)
+        if can_be_deleted is not None:
+            return can_be_deleted
+        elif self.author.level < User.LEVEL_GOD <= user.level:
+            # user has at least god level, author's level is lower than god
+            return True
+        elif user in (self.room.author, self.room.moderator):
+            return True
+        return False
 
 
 class PrivateMessage(Message):

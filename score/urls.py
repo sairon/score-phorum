@@ -26,4 +26,5 @@ urlpatterns = [
     url(r'^logout$', 'phorum.views.logout', name="logout"),
     url(r'^user/new', 'phorum.views.user_new', name="user_new"),
     url(r'^user/edit', 'phorum.views.user_edit', name="user_edit"),
+    url(r'^message/(?P<message_id>\d+)/delete', 'phorum.views.message_delete', name="message_delete"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

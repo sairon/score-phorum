@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <form action="{% url "room_edit" room_slug=room.slug %}" method="post">
+    <table>
+      {{ form }}
+      <tr>
+        <th></th>
+        <td>
+          <input type="submit" value="Upravit">
+          {% csrf_token %}
+        </td>
+      </tr>
+    </table>
+  </form>
+{% endblock %}

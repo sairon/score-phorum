@@ -1,5 +1,6 @@
 # coding=utf-8
 import os
+from autoslug.settings import slugify
 from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -8,8 +9,7 @@ from django.contrib.auth.forms import (
 )
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
-
-from .models import PublicMessage, User
+from .models import PublicMessage, Room, User
 
 
 class AvatarImageField(forms.ImageField):
@@ -84,9 +84,6 @@ class AdminUserChangeForm(DefaultUserChangeForm):
 class UserChangeForm(forms.ModelForm):
     avatar = AvatarImageField(required=False)
 
-    def __init__(self, *args, **kwargs):
-        super(UserChangeForm, self).__init__(*args, **kwargs)
-
     class Meta:
         model = User
         fields = ('email', 'motto', 'avatar')
@@ -95,3 +92,30 @@ class UserChangeForm(forms.ModelForm):
 class UserCreationForm(DefaultUserCreationForm):
     class Meta(DefaultUserCreationForm.Meta):
         model = User
+
+
+class RoomCreationForm(forms.ModelForm):
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        if Room.objects.filter(slug__exact=slugify(name)).count() > 0:
+            raise forms.ValidationError(u"Místnost s podobným názvem již existuje.")
+        return name
+
+    def save(self, commit=True, author=None):
+        if not author:
+            raise AttributeError("Při vytváření místnosti došlo k chybě - místnost musí mít autora.")
+        room = super(RoomCreationForm, self).save(False)
+        room.author = author
+        if commit:
+            room.save()
+        return room
+
+    class Meta:
+        model = Room
+        fields = ('name', 'password', 'moderator')
+
+
+class RoomChangeForm(forms.ModelForm):
+    class Meta:
+        model = Room
+        fields = ('password', 'moderator')

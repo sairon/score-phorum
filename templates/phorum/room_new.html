@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <form action="{% url "room_new" %}" method="post">
+    <table>
+      {{ form }}
+      <tr>
+        <th></th>
+        <td>
+          <input type="submit" value="Vytvořit">
+          {% csrf_token %}
+        </td>
+      </tr>
+    </table>
+  </form>
+{% endblock %}

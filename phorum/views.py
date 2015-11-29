@@ -8,7 +8,7 @@ from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, PublicMessageForm, UserCreationForm, UserChangeForm
+from .forms import LoginForm, PublicMessageForm, RoomCreationForm, RoomChangeForm, UserCreationForm, UserChangeForm
 from .models import PublicMessage, Room, RoomVisit
 
 
@@ -39,6 +39,34 @@ def room_view(request, room_slug):
         'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),
+    })
+
+
+def room_new(request):
+    form = RoomCreationForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            room = form.save(author=request.user)
+            return redirect("room_view", room_slug=room.slug)
+
+    return render(request, "phorum/room_new.html", {
+        'form': form,
+    })
+
+
+def room_edit(request, room_slug):
+    room = get_object_or_404(Room, slug=room_slug)
+    form = RoomChangeForm(request.POST or None, instance=room)
+
+    if request.method == "POST":
+        if form.is_valid():
+            room = form.save()
+            return redirect("room_view", room_slug=room.slug)
+
+    return render(request, "phorum/room_edit.html", {
+        'room': room,
+        'form': form,
     })
 
 

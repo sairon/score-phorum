@@ -196,7 +196,11 @@ def login(request):
         if form.is_valid():
             auth_login(request, form.get_user())
         else:
-            messages.error(request, "Neplatný login nebo heslo.")
+            user = form.get_user()
+            if user and not user.is_active:
+                messages.info(request, "Uživatelský účet není aktivní.")
+            else:
+                messages.error(request, "Neplatný login nebo heslo.")
 
     return redirect("home")
 
@@ -212,7 +216,7 @@ def user_new(request):
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.info(request, "Uživatel vytvořen, nyní se můžete přihlásit.")
+            messages.info(request, "Uživatelský účet vytvořen, vyčkejte prosím na jeho aktivaci administrátorem.")
             return redirect("home")
 
     return render(request, "phorum/user_new.html", {

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load score_tags %}
+{% load score_tags static %}
 
 {% block title %}{{ room.name }} | {% endblock %}
 
@@ -18,26 +18,7 @@
     </form>
   {% endif %}
 
-  {% for thread in threads %}
-    {% include "parts/message.html" with message=thread %}
-  {% endfor %}
-
-
-  <div class="pagination">
-    <span class="step-links">
-      {% if threads.has_previous %}
-        <a href="?page={{ threads.previous_page_number }}">previous</a>
-      {% endif %}
-
-      <span class="current">
-        Page {{ threads.number }} of {{ threads.paginator.num_pages }}.
-      </span>
-
-      {% if threads.has_next %}
-        <a href="?page={{ threads.next_page_number }}">next</a>
-      {% endif %}
-    </span>
-  </div>
+  {% include "parts/discussion_threads.html" %}
 
   <table>
     <thead>
@@ -54,28 +35,5 @@
 {% endblock %}
 
 {% block extra_body %}
-  <script>
-    if (!Element.prototype.hasClass) {
-      Element.prototype.hasClass = function(className) {
-        return new RegExp('(^| )' + className + '( |$)', 'gi').test(this.className);
-      }
-    }
-
-    Element.prototype.firstAncestorOfClass = function(className) {
-      var el = this;
-      while ((el = el.parentElement) && !el.hasClass(className)) {}
-      return el;
-    };
-
-    var replyEls = document.querySelectorAll(".send-reply");
-
-    Array.prototype.forEach.call(replyEls, function(el, i) {
-      el.addEventListener('click', function(e) {
-        var rootMessage = el.firstAncestorOfClass('message');
-
-        document.getElementById("id_recipient").value = rootMessage.getAttribute('data-author');
-        document.getElementById("id_thread").value = rootMessage.getAttribute('data-thread-id');
-      });
-    });
-  </script>
+  <script src="{% static "js/app.js" %}"></script>
 {% endblock %}

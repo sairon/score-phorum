@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load score_tags static %}
+
+{% block title %}Osobka | {% endblock %}
+
+{% block content %}
+  {% if request.user.is_anonymous %}
+    <form action="{% url "login" %}" method="post">
+      {% csrf_token %}
+      {{ login_form }}
+      <input type="submit" value="Login">
+    </form>
+  {% else %}
+    <form action="{% url "inbox_send" %}" method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ message_form }}
+      <input type="submit" value="Odeslat">
+    </form>
+  {% endif %}
+
+  {% include "parts/discussion_threads.html" %}
+{% endblock %}
+
+{% block extra_body %}
+  <script src="{% static "js/app.js" %}"></script>
+{% endblock %}

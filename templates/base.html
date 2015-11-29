@@ -12,6 +12,8 @@
   {% if request.user.is_authenticated %}
     Přihlášen jako {{ request.user.username }}
     |
+    <a href="{% url "inbox" %}">Moje zprávy</a> ({{ inbox_unread_count }})
+    |
     <a href="{% url "user_edit" %}">Personal</a>
     |
     <a href="{% url "logout" %}">Logout</a>

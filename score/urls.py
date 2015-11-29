@@ -21,6 +21,8 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'phorum.views.room_list', name="home"),
+    url(r'^inbox$', 'phorum.views.inbox', name="inbox"),
+    url(r'^inbox/new-message$', 'phorum.views.inbox_send', name="inbox_send"),
     url(r'^room/new$', 'phorum.views.room_new', name="room_new"),
     url(r'^room/(?P<room_slug>.+)/$', 'phorum.views.room_view', name="room_view"),
     url(r'^room/(?P<room_slug>.+)/password$', 'phorum.views.room_password_prompt', name="room_password_prompt"),

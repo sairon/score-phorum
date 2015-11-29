@@ -4,15 +4,15 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
-from django.db.models import Count, Max
+from django.db.models import Count, Max, Q
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from .forms import (
-    LoginForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
+    LoginForm, PrivateMessageForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
     RoomPasswordPrompt, UserCreationForm, UserChangeForm
 )
-from .models import PublicMessage, Room, RoomVisit
+from .models import PrivateMessage, PublicMessage, Room, RoomVisit
 from .utils import user_can_view_protected_room
 
 
@@ -96,6 +96,45 @@ def room_edit(request, room_slug):
         'room': room,
         'form': form,
     })
+
+
+@login_required
+def inbox(request):
+    page_number = request.GET.get("page", 1)
+
+    threads = PrivateMessage.objects\
+        .filter(thread=None) \
+        .filter(Q(author=request.user) | Q(recipient=request.user)) \
+        .order_by("-last_reply") \
+        .prefetch_related("author", "children__author", "children__recipient")
+
+    paginator = Paginator(threads, 10)
+    threads = paginator.page(page_number)
+
+    last_visit_time = request.user.inbox_visit_time
+    request.user.update_inbox_visit_time()
+
+    return render(request, "phorum/inbox.html", {
+        'threads': threads,
+        'last_visit_time': last_visit_time,
+        'message_form': PrivateMessageForm(request.POST or None),
+    })
+
+
+@require_POST
+def inbox_send(request):
+    message_form = PrivateMessageForm(request.POST or None)
+
+    if request.user.is_authenticated():
+        if message_form.is_valid():
+            message_form.save(author=request.user)
+            return redirect("inbox")
+        else:
+            messages.error(request, "Formulář se zprávou obsahuje chyby.")
+    else:
+        messages.error(request, "Pro zasílání zpráv musíte být přihlášen.")
+
+    return inbox(request)
 
 
 @require_POST

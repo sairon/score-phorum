@@ -61,6 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     motto = models.CharField(max_length=64, blank=True)
     avatar = models.ImageField(upload_to="avatars", blank=True)
     room_keyring = models.ManyToManyField("Room", through="UserRoomKeyring")
+    inbox_visit_time = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = _('user')
@@ -100,6 +101,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         elif self.kredyti > 150:
             return User.LEVEL_YELLOW
         return User.LEVEL_GREEN
+
+    def update_inbox_visit_time(self):
+        self.inbox_visit_time = timezone.now()
+        self.save()
 
 
 class Room(models.Model):

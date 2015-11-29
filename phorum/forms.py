@@ -11,7 +11,7 @@ from django.contrib.auth.hashers import check_password
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
 
-from .models import PublicMessage, Room, User, UserRoomKeyring
+from .models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
 
 
 class AvatarImageField(forms.ImageField):
@@ -43,12 +43,11 @@ class AvatarImageField(forms.ImageField):
         return data
 
 
-class PublicMessageForm(forms.ModelForm):
+class BaseMessageForm(forms.ModelForm):
     recipient = forms.CharField(required=False)
 
     class Meta:
         fields = ('text', 'thread', 'recipient')
-        model = PublicMessage
         widgets = {
             'thread': forms.HiddenInput,
             'recipient': forms.TextInput,
@@ -64,11 +63,26 @@ class PublicMessageForm(forms.ModelForm):
                 raise forms.ValidationError(u"Uživatel s přezdívkou '%s' neexistuje." % recipient_name)
         return recipient
 
+    def save(self, commit=True, author=None):
+        message = super(BaseMessageForm, self).save(False)
+        message.author = author
+        if commit:
+            message.save()
+        return message
+
+
+class PrivateMessageForm(BaseMessageForm):
+    class Meta(BaseMessageForm.Meta):
+        model = PrivateMessage
+
+
+class PublicMessageForm(BaseMessageForm):
+    class Meta(BaseMessageForm.Meta):
+        model = PublicMessage
+
     def save(self, commit=True, author=None, room=None):
         message = super(PublicMessageForm, self).save(False)
-        message.author = author
         message.room = room
-
         if commit:
             message.save()
         return message

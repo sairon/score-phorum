@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load score_tags %}
 
+{% block title %}{{ room.name }} | {% endblock %}
+
 {% block content %}
   {% if request.user.is_anonymous %}
     <form action="{% url "login" %}" method="post">

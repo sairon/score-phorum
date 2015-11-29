@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'phorum.views.room_list', name="home"),
     url(r'^room/(?P<room_slug>.+)/$', 'phorum.views.room_view', name="room_view"),
+    url(r'^room/(?P<room_slug>.+)/new-message$', 'phorum.views.message_send', name="message_send"),
     url(r'^login$', 'phorum.views.login', name="login"),
     url(r'^logout$', 'phorum.views.logout', name="logout"),
     url(r'^user/new', 'phorum.views.user_new', name="user_new"),

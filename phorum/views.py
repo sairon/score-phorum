@@ -6,6 +6,7 @@ from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
 from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
+from django.views.decorators.http import require_POST
 
 from .forms import LoginForm, PublicMessageForm, UserCreationForm, UserChangeForm
 from .models import PublicMessage, Room, RoomVisit
@@ -24,8 +25,6 @@ def room_view(request, room_slug):
     paginator = Paginator(threads, 10)
     threads = paginator.page(page_number)
 
-    message_form = PublicMessageForm(request.POST or None)
-
     last_visit_time = None
     if request.user.is_authenticated():
         visit, created = RoomVisit.objects.get_or_create(user=request.user, room=room)
@@ -34,17 +33,30 @@ def room_view(request, room_slug):
             # just update the time
             visit.save()
 
-        if request.method == "POST":
-            if message_form.is_valid():
-                message_form.save(author=request.user, room=room)
-                return redirect("room_view", room_slug=room.slug)
-
     return render(request, "phorum/room_view.html", {
+        'room': room,
         'threads': threads,
         'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),
     })
+
+
+@require_POST
+def message_send(request, room_slug):
+    message_form = PublicMessageForm(request.POST or None)
+    room = get_object_or_404(Room, slug=room_slug)
+
+    if request.user.is_authenticated():
+        if message_form.is_valid():
+            message_form.save(author=request.user, room=room)
+            return redirect("room_view", room_slug=room.slug)
+        else:
+            messages.error(request, "Formulář se zprávou obsahuje chyby.")
+    else:
+        messages.error(request, "Pro zasílání zpráv musíte být přihlášen.")
+
+    return room_view(request, room_slug)
 
 
 def room_list(request):

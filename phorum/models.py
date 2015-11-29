@@ -60,6 +60,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     level_override = models.PositiveSmallIntegerField(null=True, blank=True, choices=LEVELS)
     motto = models.CharField(max_length=64, blank=True)
     avatar = models.ImageField(upload_to="avatars", blank=True)
+    room_keyring = models.ManyToManyField("Room", through="UserRoomKeyring")
 
     class Meta:
         verbose_name = _('user')
@@ -108,6 +109,7 @@ class Room(models.Model):
     moderator = models.ForeignKey(User, related_name="moderated_rooms", null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     password = models.CharField(max_length=128, blank=True)
+    password_changed = models.DateTimeField(null=True, blank=True)
     visits = models.ManyToManyField(User, through="RoomVisit")
     pinned = models.BooleanField(default=False)
 
@@ -118,13 +120,28 @@ class Room(models.Model):
         return self.name
 
     def set_password(self, raw_password):
-        self.password = make_password(raw_password)
+        if raw_password:
+            self.password = make_password(raw_password)
+            self.password_changed = timezone.now()
+        else:
+            self.password = ""
+            self.password_changed = None
+
+    @property
+    def protected(self):
+        return bool(self.password)
 
 
 class RoomVisit(models.Model):
     room = models.ForeignKey(Room)
     user = models.ForeignKey(User)
     visit_time = models.DateTimeField(auto_now=True)
+
+
+class UserRoomKeyring(models.Model):
+    room = models.ForeignKey(Room)
+    user = models.ForeignKey(User)
+    last_successful_entry = models.DateTimeField(auto_now=True)
 
 
 class LastReplyField(models.DateTimeField):

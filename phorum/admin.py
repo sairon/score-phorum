@@ -1,13 +1,29 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DefaultUserAdmin
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.utils.translation import ugettext_lazy as _
 
 from .forms import AdminUserChangeForm
 from .models import Room, User
 
 
+class AdminRoomChangeForm(forms.ModelForm):
+    password = ReadOnlyPasswordHashField(
+        help_text=_("Raw passwords are not stored, so there is no way to see this password.")
+    )
+
+    class Meta:
+        model = Room
+        fields = '__all__'
+
+    def clean_password(self):
+        return self.initial["password"]
+
+
 class RoomAdmin(admin.ModelAdmin):
     list_display = ('name', 'pinned', 'created')
+    form = AdminRoomChangeForm
 
 
 class UserAdmin(DefaultUserAdmin):

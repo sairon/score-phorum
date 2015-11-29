@@ -8,12 +8,23 @@ from django.db.models import Count, Max
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, PublicMessageForm, RoomCreationForm, RoomChangeForm, UserCreationForm, UserChangeForm
+from .forms import (
+    LoginForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
+    RoomPasswordPrompt, UserCreationForm, UserChangeForm
+)
 from .models import PublicMessage, Room, RoomVisit
+from .utils import user_can_view_protected_room
 
 
 def room_view(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
+
+    if room.protected:
+        if not request.user.is_authenticated():
+            messages.error(request, "Do zaheslovaných místností mají přístup pouze přihlášení uživatelé.")
+            return redirect("home")
+        elif not user_can_view_protected_room(request.user, room):
+            return redirect("room_password_prompt", room_slug=room_slug)
 
     page_number = request.GET.get("page", 1)
 
@@ -39,6 +50,23 @@ def room_view(request, room_slug):
         'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None),
         'login_form': LoginForm(),
+    })
+
+
+def room_password_prompt(request, room_slug):
+    room = get_object_or_404(Room, slug=room_slug)
+
+    if room.protected and not user_can_view_protected_room(request.user, room):
+        messages.error(request, "Do místnosti, do které zasíláte zprávu, již nemáte přístup.")
+        return redirect("home")
+
+    form = RoomPasswordPrompt(request.POST or None, user=request.user, room=room)
+    if form.is_valid():
+        return redirect("room_view", room_slug=room_slug)
+
+    return render(request, "phorum/room_password_prompt.html", {
+        'room': room,
+        'form': form,
     })
 
 

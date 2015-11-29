@@ -7,9 +7,11 @@ from django.contrib.auth.forms import (
     UserChangeForm as DefaultUserChangeForm,
     UserCreationForm as DefaultUserCreationForm
 )
+from django.contrib.auth.hashers import check_password
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
-from .models import PublicMessage, Room, User
+
+from .models import PublicMessage, Room, User, UserRoomKeyring
 
 
 class AvatarImageField(forms.ImageField):
@@ -106,6 +108,7 @@ class RoomCreationForm(forms.ModelForm):
             raise AttributeError("Při vytváření místnosti došlo k chybě - místnost musí mít autora.")
         room = super(RoomCreationForm, self).save(False)
         room.author = author
+        room.set_password(self.cleaned_data['password'])
         if commit:
             room.save()
         return room
@@ -116,6 +119,42 @@ class RoomCreationForm(forms.ModelForm):
 
 
 class RoomChangeForm(forms.ModelForm):
+    password = forms.CharField(label="Nové heslo", required=False, widget=forms.PasswordInput)
+    clear_password = forms.BooleanField(label="Odstranit heslo", required=False)
+
+    def save(self, commit=True):
+        room = super(RoomChangeForm, self).save(False)
+        new_password = self.cleaned_data['password']
+        if self.cleaned_data['clear_password']:
+            room.set_password("")
+        elif new_password:
+            room.set_password(new_password)
+        if commit:
+            room.save()
+        return room
+
     class Meta:
         model = Room
-        fields = ('password', 'moderator')
+        fields = ('password', 'clear_password', 'moderator')
+
+
+class RoomPasswordPrompt(forms.Form):
+    password = forms.CharField(required=True, widget=forms.PasswordInput)
+
+    def __init__(self, *args, **kwargs):
+        self.room = kwargs.pop("room")
+        self.user = kwargs.pop("user")
+        super(RoomPasswordPrompt, self).__init__(*args, **kwargs)
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        if not check_password(password, self.room.password):
+            raise forms.ValidationError(u"Heslo je neplatné.")
+
+        # save entry to keyring
+        keyring_record, created = UserRoomKeyring.objects.get_or_create(room=self.room, user=self.user)
+        if not created:
+            # save to update time
+            keyring_record.save()
+
+        return password

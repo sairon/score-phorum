@@ -1,6 +1,15 @@
 #room-list
+  width: 80%
+  min-width: 50em
+  margin: 0 auto
   a
     font-weight: bold
 
   td
     padding: 0.2em
+    &:last-child
+      text-align: right
+
+  tr:nth-child(4n)
+    td
+      background-color: #94ada5

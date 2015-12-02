@@ -47,7 +47,7 @@ class BaseMessageForm(forms.ModelForm):
     recipient = forms.CharField(required=False)
 
     class Meta:
-        fields = ('text', 'thread', 'recipient')
+        fields = ('recipient', 'text', 'thread')
         widgets = {
             'thread': forms.HiddenInput,
             'recipient': forms.TextInput,

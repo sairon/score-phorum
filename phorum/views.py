@@ -13,7 +13,7 @@ from .forms import (
     RoomPasswordPrompt, UserCreationForm, UserChangeForm
 )
 from .models import PrivateMessage, PublicMessage, Room, RoomVisit
-from .utils import user_can_view_protected_room
+from .utils import user_can_view_protected_room, get_ip_addr
 
 
 def room_view(request, room_slug):
@@ -199,6 +199,8 @@ def login(request):
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             auth_login(request, form.get_user())
+            request.user.last_ip = get_ip_addr(request)
+            request.user.save(update_fields=['last_ip'])
         else:
             user = form.get_user()
             if user and not user.is_active:

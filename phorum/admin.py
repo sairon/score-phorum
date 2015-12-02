@@ -49,7 +49,7 @@ class UserAdmin(DefaultUserAdmin):
         (_('Personal info'), {'fields': ('email', 'kredyti', 'level_override', 'motto', 'avatar')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Important info'), {'fields': ('last_login', 'last_ip', 'date_joined')}),
     )
 
     actions = [activate_users]

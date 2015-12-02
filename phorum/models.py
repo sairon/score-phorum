@@ -62,6 +62,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     avatar = models.ImageField(upload_to="avatars", blank=True)
     room_keyring = models.ManyToManyField("Room", through="UserRoomKeyring")
     inbox_visit_time = models.DateTimeField(null=True, blank=True)
+    last_ip = models.GenericIPAddressField(null=True, blank=True)
 
     class Meta:
         verbose_name = _('user')

@@ -26,6 +26,11 @@ class RoomAdmin(admin.ModelAdmin):
     form = AdminRoomChangeForm
 
 
+def activate_users(modeladmin, request, queryset):
+    queryset.update(is_active=True)
+activate_users.short_description = "Make selected users active"
+
+
 class UserAdmin(DefaultUserAdmin):
     form = AdminUserChangeForm
 
@@ -46,6 +51,8 @@ class UserAdmin(DefaultUserAdmin):
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
+
+    actions = [activate_users]
 
 
 admin.site.register(Room, RoomAdmin)

@@ -18,8 +18,8 @@ class AvatarImageField(forms.ImageField):
     valid_extensions = ('jpg', 'jpeg', 'gif', 'png')
     valid_content_types = {
         'image/jpeg': (".jpg", ".jpeg"),
-        'image/gif': (".png",),
-        'image/png': (".gif",),
+        'image/gif': (".gif",),
+        'image/png': (".png",),
     }
     max_image_size = 15 * 1024  # bytes
 

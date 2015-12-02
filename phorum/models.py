@@ -107,7 +107,17 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save()
 
 
+class RoomQueryset(models.QuerySet):
+    def pinned(self):
+        return self.filter(pinned=True)
+
+    def not_pinned(self):
+        return self.filter(pinned=False)
+
+
 class Room(models.Model):
+    objects = RoomQueryset.as_manager()
+
     name = models.CharField(max_length=64, unique=True)
     slug = AutoSlugField(populate_from='name')
     author = models.ForeignKey(User, related_name="created_rooms", null=True, blank=True)

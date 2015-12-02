@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% load score_tags %}
 
 {% block content %}
   {% if request.user.is_anonymous %}
@@ -10,22 +9,20 @@
     </form>
   {% endif %}
 
-  <table id="room-list">
+  <table class="room-list">
     <tbody>
-      {% for room in rooms %}
-        <tr>
-          <td><a href="{% url "room_view" room_slug=room.slug %}">{{ room.name }}</a></td>
-          <td>
-            {% if room.total_messages %}
-              {% if request.user.is_authenticated %}{% new_posts room visits %} /{% endif %}
-              {{ room.total_messages }}
-              |
-              {{ room.last_message_time|date:"d.m H:i" }}
-            {% else %}
-              pusto a prázdno...
-            {% endif %}
-          </td>
-        </tr>
+      {% for room in rooms.pinned %}
+        {% include "parts/roomlist_row.html" %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <hr>
+
+  <table class="room-list">
+    <tbody>
+      {% for room in rooms.not_pinned %}
+        {% include "parts/roomlist_row.html" %}
       {% endfor %}
     </tbody>
   </table>

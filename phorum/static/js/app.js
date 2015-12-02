@@ -16,7 +16,10 @@ Array.prototype.forEach.call(replyEls, function(el, i) {
   el.addEventListener('click', function(e) {
     var rootMessage = el.firstAncestorOfClass('message');
 
-    document.getElementById("id_recipient").value = rootMessage.getAttribute('data-author');
-    document.getElementById("id_thread").value = rootMessage.getAttribute('data-thread-id');
+    var recipientInput = document.getElementById("id_recipient");
+    if (recipientInput) {
+      recipientInput.value = rootMessage.getAttribute('data-author');
+      document.getElementById("id_thread").value = rootMessage.getAttribute('data-thread-id');
+    }
   });
 });

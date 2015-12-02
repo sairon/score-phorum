@@ -53,6 +53,7 @@ def room_view(request, room_slug):
     })
 
 
+@login_required
 def room_password_prompt(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
 
@@ -70,6 +71,7 @@ def room_password_prompt(request, room_slug):
     })
 
 
+@login_required
 def room_new(request):
     form = RoomCreationForm(request.POST or None)
 
@@ -83,6 +85,7 @@ def room_new(request):
     })
 
 
+@login_required
 def room_edit(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
     form = RoomChangeForm(request.POST or None, instance=room)
@@ -177,6 +180,7 @@ def room_list(request):
     })
 
 
+@login_required
 def message_delete(request, message_id):
     message = get_object_or_404(PublicMessage, pk=message_id)
     message_room_slug = message.room.slug

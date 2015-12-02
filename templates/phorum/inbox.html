@@ -13,7 +13,7 @@
   {% else %}
     <form action="{% url "inbox_send" %}" method="post" autocomplete="off">
       {% csrf_token %}
-      {{ message_form }}
+      {{ message_form.as_p }}
       <input type="submit" value="Odeslat">
     </form>
   {% endif %}

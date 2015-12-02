@@ -81,7 +81,7 @@ class PublicMessageForm(BaseMessageForm):
         model = PublicMessage
 
     def save(self, commit=True, author=None, room=None):
-        message = super(PublicMessageForm, self).save(False)
+        message = super(PublicMessageForm, self).save(False, author=author)
         message.room = room
         if commit:
             message.save()

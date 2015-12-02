@@ -23,7 +23,7 @@
     <img src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
   </div>
-  <div class="text">{{ message.text|bleach }}</div>
+  <div class="text">{{ message.text|bleach|nl2br }}</div>
 </div>
 
 {% if not message.thread %}

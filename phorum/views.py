@@ -57,10 +57,6 @@ def room_view(request, room_slug):
 def room_password_prompt(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
 
-    if room.protected and not user_can_view_protected_room(request.user, room):
-        messages.error(request, "Do místnosti, do které zasíláte zprávu, již nemáte přístup.")
-        return redirect("home")
-
     form = RoomPasswordPrompt(request.POST or None, user=request.user, room=room)
     if form.is_valid():
         return redirect("room_view", room_slug=room_slug)
@@ -146,6 +142,10 @@ def message_send(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
 
     if request.user.is_authenticated():
+        if room.protected and not user_can_view_protected_room(request.user, room):
+            messages.error(request, "Do místnosti, do které zasíláte zprávu, již nemáte přístup.")
+            return redirect("home")
+
         if message_form.is_valid():
             message_form.save(author=request.user, room=room)
             return redirect("room_view", room_slug=room.slug)

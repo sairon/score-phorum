@@ -72,6 +72,10 @@ class BaseMessageForm(forms.ModelForm):
 
 
 class PrivateMessageForm(BaseMessageForm):
+    def __init__(self, *args, **kwargs):
+        super(PrivateMessageForm, self).__init__(*args, **kwargs)
+        self.fields['recipient'].required = True
+
     class Meta(BaseMessageForm.Meta):
         model = PrivateMessage
 

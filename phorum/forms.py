@@ -108,6 +108,7 @@ class UserChangeForm(forms.ModelForm):
 class UserCreationForm(DefaultUserCreationForm):
     class Meta(DefaultUserCreationForm.Meta):
         model = User
+        fields = ('username', 'email', 'motto')
 
 
 class RoomCreationForm(forms.ModelForm):

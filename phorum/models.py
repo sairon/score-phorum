@@ -217,4 +217,4 @@ class PublicMessage(Message):
 
 
 class PrivateMessage(Message):
-    pass
+    private = True

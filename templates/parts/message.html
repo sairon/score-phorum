@@ -12,7 +12,7 @@
       <div class="author">
         <b>od:</b> {{ message.author.username }}
         {% if message|can_be_deleted_by:request.user %}
-          - <a href="{% url "message_delete" message_id=message.id %}">smaž</a>
+          - <a href="{% url "message_delete" message_id=message.id %}{% if message.private %}?inbox=1{% endif %}">smaž</a>
         {% endif %}
       </div>
       <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>

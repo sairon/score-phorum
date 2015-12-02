@@ -182,16 +182,20 @@ def room_list(request):
 
 @login_required
 def message_delete(request, message_id):
-    message = get_object_or_404(PublicMessage, pk=message_id)
-    message_room_slug = message.room.slug
+    is_private = request.GET.get("inbox", 0) == "1"
+    message = get_object_or_404(PrivateMessage if is_private else PublicMessage, pk=message_id)
 
     if message.can_be_deleted_by(request.user):
         message.delete()
         messages.info(request, "Zpráva byla smazána.")
-        return redirect("room_view", room_slug=message_room_slug)
     else:
         messages.error(request, "Nemáte oprávnění ke smazání zprávy.")
-        return redirect("room_view", room_slug=message_room_slug)
+
+    if is_private:
+        return redirect("inbox")
+
+    message_room_slug = message.room.slug
+    return redirect("room_view", room_slug=message_room_slug)
 
 
 def login(request):

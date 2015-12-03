@@ -148,6 +148,7 @@ def message_send(request, room_slug):
 
         if message_form.is_valid():
             message_form.save(author=request.user, room=room)
+            request.user.increase_kredyti()
             return redirect("room_view", room_slug=room.slug)
         else:
             messages.error(request, "Formulář se zprávou obsahuje chyby.")
@@ -186,6 +187,8 @@ def message_delete(request, message_id):
     message = get_object_or_404(PrivateMessage if is_private else PublicMessage, pk=message_id)
 
     if message.can_be_deleted_by(request.user):
+        if not is_private:
+            message.author.decrease_kredyti()
         message.delete()
         messages.info(request, "Zpráva byla smazána.")
     else:

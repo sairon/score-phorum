@@ -107,6 +107,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.inbox_visit_time = timezone.now()
         self.save()
 
+    def increase_kredyti(self, count=1):
+        self.kredyti += count
+        self.save(update_fields=['kredyti'])
+
+    def decrease_kredyti(self, count=1):
+        self.kredyti -= min(count, self.kredyti)
+        self.save(update_fields=['kredyti'])
+
 
 class RoomQueryset(models.QuerySet):
     def pinned(self):

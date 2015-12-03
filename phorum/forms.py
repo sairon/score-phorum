@@ -117,7 +117,7 @@ class UserCreationForm(DefaultUserCreationForm):
 
 class RoomCreationForm(forms.ModelForm):
     def clean_name(self):
-        name = self.cleaned_data['name']
+        name = self.cleaned_data['name'].strip()
         if Room.objects.filter(slug__exact=slugify(name)).count() > 0:
             raise forms.ValidationError(u"Místnost s podobným názvem již existuje.")
         return name

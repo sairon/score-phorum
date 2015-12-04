@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
 from django.db.models import Count, Max, Q
+from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -84,6 +85,10 @@ def room_new(request):
 @login_required
 def room_edit(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
+
+    if not room.can_be_modified_by(request.user):
+        return HttpResponseForbidden("Nemáte oprávnění editovat tuto místnost.")
+
     form = RoomChangeForm(request.POST or None, instance=room)
 
     if request.method == "POST":

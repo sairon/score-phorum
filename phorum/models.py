@@ -143,6 +143,9 @@ class Room(models.Model):
     def __unicode__(self):
         return self.name
 
+    def can_be_modified_by(self, user):
+        return user.is_superuser() or user == self.author
+
     def set_password(self, raw_password):
         if raw_password:
             self.password = make_password(raw_password)

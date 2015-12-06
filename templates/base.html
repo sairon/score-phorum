@@ -1,4 +1,4 @@
-{% load static %}<!DOCTYPE html>
+{% load activelink static %}<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -28,8 +28,10 @@
           nové příspěvky: {{ new_posts }}
           |
         {% endif %}
-        <a href="{% url "home" %}">místnosti</a>
-        |
+        {% if request.path != "/" %}
+          <a href="{% url "home" %}">místnosti</a>
+          |
+        {% endif %}
         <a href="{{ request.get_full_path }}">refresh</a>
         |
         <a href="{% url "logout" %}">odhlásit</a>

@@ -21,6 +21,7 @@ Array.prototype.forEach.call(replyEls, function(el, i) {
       recipientInput.value = rootMessage.getAttribute('data-author');
       document.getElementById("id_thread").value = rootMessage.getAttribute('data-thread-id');
       window.scrollTo(0, 0);
+      document.getElementById("id_text").focus();
     }
   });
 });

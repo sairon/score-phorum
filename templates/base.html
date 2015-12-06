@@ -9,27 +9,33 @@
   <link rel="stylesheet" href="{% static "css/screen.css" %}">
 </head>
 <body>
-  {% if request.user.is_authenticated %}
-    <div class="user-menu">
-      <a href="{% url "user_edit" %}">{{ request.user.username }}</a>
-      |
-      <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
-      |
-      {% if new_posts >= 0 %}
-        nové příspěvky: {{ new_posts }}
+  <div class="top-menu">
+    {% if login_form and request.user.is_anonymous%}
+      <form action="{% url "login" %}" method="post">
+        {% csrf_token %}
+        {{ login_form }}
+        <input type="submit" value="Login">
+      </form>
+
+      | <a href="{{ request.get_full_path }}">refresh</a> |
+    {% elif request.user.is_authenticated %}
         |
-      {% endif %}
-      <a href="{% url "home" %}">místnosti</a>
-      |
-      <a href="{{ request.get_full_path }}">refresh</a>
-      |
-      <a href="{% url "logout" %}">odhlásit</a>
-    </div>
-  {% else %}
-      <a href="{% url "home" %}">místnosti</a>
-      |
-      <a href="">refresh</a>
-  {% endif %}
+        <a href="{% url "user_edit" %}">{{ request.user.username }}</a>
+        |
+        <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
+        |
+        {% if new_posts >= 0 %}
+          nové příspěvky: {{ new_posts }}
+          |
+        {% endif %}
+        <a href="{% url "home" %}">místnosti</a>
+        |
+        <a href="{{ request.get_full_path }}">refresh</a>
+        |
+        <a href="{% url "logout" %}">odhlásit</a>
+        |
+    {% endif %}
+  </div>
 
   {% include "snippets/messages.html" with messages=messages only %}
 

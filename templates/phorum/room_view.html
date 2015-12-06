@@ -4,13 +4,7 @@
 {% block title %}{{ room.name }} | {% endblock %}
 
 {% block content %}
-  {% if request.user.is_anonymous %}
-    <form action="{% url "login" %}" method="post">
-      {% csrf_token %}
-      {{ login_form }}
-      <input type="submit" value="Login">
-    </form>
-  {% else %}
+  {% if request.user.is_authenticated %}
     <form class="message-form" action="{% url "message_send" room_slug=room.slug %}" method="post" autocomplete="off">
       {% csrf_token %}
       {{ message_form.as_p }}

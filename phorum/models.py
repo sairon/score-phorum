@@ -7,7 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import UserManager
+from .managers import UserManager, RoomVisitManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -160,6 +160,8 @@ class Room(models.Model):
 
 
 class RoomVisit(models.Model):
+    objects = RoomVisitManager()
+
     room = models.ForeignKey(Room)
     user = models.ForeignKey(User)
     visit_time = models.DateTimeField(auto_now=True)

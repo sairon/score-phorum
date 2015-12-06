@@ -1,5 +1,19 @@
 from django.contrib.auth.models import BaseUserManager
+from django.db.models import Manager
 from django.utils import timezone
+
+
+class RoomVisitManager(Manager):
+    def visits_for_user(self, user):
+        visits = self.filter(user=user).extra(
+            select={
+                'new_messages': 'SELECT COUNT(*) FROM "phorum_publicmessage" '
+                                'WHERE "phorum_publicmessage"."created" > "phorum_roomvisit"."visit_time" '
+                                'AND "phorum_publicmessage"."room_id" = "phorum_roomvisit"."room_id"'
+            }
+        ) \
+            .values_list("room", "new_messages")
+        return dict(visits)
 
 
 class UserManager(BaseUserManager):

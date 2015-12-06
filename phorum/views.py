@@ -38,15 +38,20 @@ def room_view(request, room_slug):
     threads = paginator.page(page_number)
 
     last_visit_time = None
+    new_posts = None
     if request.user.is_authenticated():
         visit, created = RoomVisit.objects.get_or_create(user=request.user, room=room)
         if not created:
+            new_posts = PublicMessage.objects.filter(room=room, created__gte=visit.visit_time).count()
             last_visit_time = visit.visit_time
             # just update the time
             visit.save()
+        else:
+            new_posts = PublicMessage.objects.filter(room=room).count()
 
     return render(request, "phorum/room_view.html", {
         'room': room,
+        'new_posts': new_posts,
         'threads': threads,
         'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None),
@@ -167,17 +172,7 @@ def room_list(request):
     rooms = Room.objects.annotate(total_messages=Count("publicmessage"),
                                   last_message_time=Max("publicmessage__created"))
 
-    visits = None
-    if request.user.is_authenticated():
-        visits = RoomVisit.objects.filter(user=request.user).extra(
-            select={
-                'new_messages': 'SELECT COUNT(*) FROM "phorum_publicmessage" '
-                                'WHERE "phorum_publicmessage"."created" > "phorum_roomvisit"."visit_time" '
-                                'AND "phorum_publicmessage"."room_id" = "phorum_roomvisit"."room_id"'
-            }
-        ) \
-            .values_list("room", "new_messages")
-        visits = dict(visits)
+    visits = RoomVisit.objects.visits_for_user(request.user) if request.user.is_authenticated() else None
 
     return render(request, "phorum/room_list.html", {
         'rooms': rooms,

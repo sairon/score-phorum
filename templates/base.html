@@ -15,6 +15,10 @@
       |
       <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
       |
+      {% if new_posts >= 0 %}
+        nové příspěvky: {{ new_posts }}
+        |
+      {% endif %}
       <a href="{% url "home" %}">místnosti</a>
       |
       <a href="{{ request.get_full_path }}">refresh</a>

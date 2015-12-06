@@ -153,7 +153,7 @@ LOGGING = {
 }
 
 
-BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'font', 'br', 'img']
+BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'font', 'br', 'img', 'sub', 'sup', 'marquee']
 BLEACH_ALLOWED_ATTRIBUTES = ['href', 'title', 'style', 'color', 'src']
 
 BLEACH_ALLOWED_STYLES = [

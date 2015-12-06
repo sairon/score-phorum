@@ -128,7 +128,7 @@ class Room(models.Model):
     objects = RoomQueryset.as_manager()
 
     name = models.CharField(max_length=64, unique=True)
-    slug = AutoSlugField(populate_from='name')
+    slug = AutoSlugField(populate_from='name', always_update=True)
     author = models.ForeignKey(User, related_name="created_rooms", null=True, blank=True)
     moderator = models.ForeignKey(User, related_name="moderated_rooms", null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)

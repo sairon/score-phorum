@@ -5,9 +5,11 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 
-@register.simple_tag
+@register.filter
 def new_posts(room, visits):
-    return escape(visits.get(room.id, room.total_messages))
+    if not visits:
+        return None
+    return visits.get(room.id, room.total_messages)
 
 
 @register.filter

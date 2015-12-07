@@ -1,4 +1,7 @@
 # coding=utf-8
+from datetime import timedelta
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -7,8 +10,10 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render, get_object_or_404
+from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
+from user_sessions.models import Session
 
 from .forms import (
     LoginForm, PrivateMessageForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
@@ -41,6 +46,12 @@ def room_view(request, room_slug):
     last_visit_time = None
     new_posts = None
     if request.user.is_authenticated():
+        # activity tracking - update last room
+        request.session['last_action'] = {
+            'name': room.name,
+            'url': request.path,
+        }
+
         visit, created = RoomVisit.objects.get_or_create(user=request.user, room=room)
         if not created:
             new_posts = PublicMessage.objects.filter(room=room, created__gte=visit.visit_time).count()
@@ -252,4 +263,18 @@ def user_edit(request):
 
     return render(request, "phorum/user_edit.html", {
         'form': form
+    })
+
+
+@login_required
+def users(request):
+    active_threshold = now() - timedelta(minutes=settings.ACTIVE_USERS_TIMEOUT)
+
+    sessions = Session.objects\
+        .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
+        .prefetch_related('user')\
+        .order_by('user__username')
+
+    return render(request, "phorum/users.html", {
+        'sessions': sessions
     })

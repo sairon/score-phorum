@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Uživatelé | {% endblock %}
+
+{% block content %}
+  <table>
+    <tbody>
+      {% for session in sessions %}
+        <tr>
+          <td>{{ session.user.username }}</td>
+          <td>
+            {% if session.get_decoded.last_action.url %}<a href="{{ session.get_decoded.last_action.url }}">{{ session.get_decoded.last_action.name }}</a>
+            {% else %}{{ session.get_decoded.last_action.name }}{% endif %}
+          </td>
+          <td>{{ session.user.motto }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

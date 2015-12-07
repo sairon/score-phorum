@@ -1,4 +1,9 @@
+from datetime import timedelta
+
+from django.conf import settings
 from django.db.models import Q
+from django.utils.timezone import now
+from user_sessions.models import Session
 
 from .models import PrivateMessage
 
@@ -19,4 +24,16 @@ def inbox_messages(request):
 
     return {
         'inbox_unread_count': inbox_unread_count
+    }
+
+
+def active_users(request):
+    active_threshold = now() - timedelta(minutes=settings.ACTIVE_USERS_TIMEOUT)
+
+    active_users_count = Session.objects\
+        .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
+        .count()
+
+    return {
+        'active_users_count': active_users_count
     }

@@ -32,6 +32,8 @@
           <a href="{% url "home" %}">místnosti</a>
           |
         {% endif %}
+        <a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})
+        |
         <a href="{{ request.get_full_path }}">refresh</a>
         |
         <a href="{% url "logout" %}">odhlásit</a>

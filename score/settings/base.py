@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'user_sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bleach',
@@ -45,15 +45,18 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
+    'user_sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'phorum.middleware.UserActivityMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
+
+SESSION_ENGINE = 'user_sessions.backends.db'
 
 ROOT_URLCONF = 'score.urls'
 
@@ -68,6 +71,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'phorum.context_processors.active_users',
                 'phorum.context_processors.inbox_messages',
             ],
         },
@@ -162,3 +166,6 @@ BLEACH_ALLOWED_STYLES = [
 
 BLEACH_STRIP_TAGS = False
 BLEACH_STRIP_COMMENTS = True
+
+
+ACTIVE_USERS_TIMEOUT = 20  # minutes

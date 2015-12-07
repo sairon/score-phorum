@@ -1,6 +1,7 @@
-{% load score_tags %}
+{% load score_tags static %}
 
 <tr{% if room|new_posts:visits > 0 %} class="unread"{% endif %}>
+  <td>{% if room.protected %}<img src="{% static "img/key.gif" %}">{% endif %}</td>
   <td><a href="{% url "room_view" room_slug=room.slug %}">{{ room.name }}</a></td>
   <td>
     {% if room.total_messages %}

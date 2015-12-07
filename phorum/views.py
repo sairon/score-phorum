@@ -38,7 +38,7 @@ def room_view(request, room_slug):
     threads = PublicMessage.objects\
         .filter(room=room, thread=None) \
         .order_by("-last_reply") \
-        .prefetch_related("author", "children__author", "children__recipient")
+        .prefetch_related("author", "children__author", "children__recipient", "room", "children__room")
 
     paginator = Paginator(threads, 10)
     threads = paginator.page(page_number)

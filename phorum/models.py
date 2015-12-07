@@ -6,8 +6,10 @@ from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from django_bleach.models import BleachField
 
 from .managers import UserManager, RoomVisitManager
+from .utils import nl2br
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -180,12 +182,19 @@ class LastReplyField(models.DateTimeField):
         return super(LastReplyField, self).pre_save(model_instance, add)
 
 
+class MessageTextField(BleachField):
+    """Bleach field extended with nl2br transformation before saving."""
+
+    def pre_save(self, model_instance, add):
+        return nl2br(super(MessageTextField, self).pre_save(model_instance, add))
+
+
 class Message(models.Model):
     thread = models.ForeignKey("self", null=True, blank=True, db_index=True,
                                related_name="children")
     author = models.ForeignKey(User, related_name="posted_%(class)s")
     recipient = models.ForeignKey(User, related_name="received_%(class)s", blank=True, null=True)
-    text = models.TextField()
+    text = MessageTextField()
     created = models.DateTimeField(auto_now_add=True)
     last_reply = LastReplyField(null=True, blank=True)
 

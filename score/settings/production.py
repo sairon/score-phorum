@@ -9,7 +9,7 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
         'django.template.loaders.app_directories.Loader',
     ])]
 
-ALLOWED_HOSTS = ["www.scorephorum.cz", "beta.scorephorum.cz"]
+ALLOWED_HOSTS = ["www.scorephorum.cz", "beta.scorephorum.cz", "localhost"]
 
 ADMINS = (
     ("Jan Cermak", "sairon@sairon.cz"),

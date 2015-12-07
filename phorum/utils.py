@@ -1,7 +1,6 @@
-from .models import UserRoomKeyring
-
-
 def user_can_view_protected_room(user, room):
+    from .models import UserRoomKeyring
+
     try:
         record = UserRoomKeyring.objects.get(user=user, room=room)
         if room.password_changed < record.last_successful_entry:
@@ -18,3 +17,11 @@ def get_ip_addr(request):
     else:
         ip_addr = request.META.get("REMOTE_ADDR")
     return ip_addr
+
+
+def nl2br(text):
+    """Translate unix newlines to HTML <br> tags.
+
+    Also removes trailing and leading whitespace in the process.
+    """
+    return text.strip().replace("\n", "<br>")

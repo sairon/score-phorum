@@ -1,4 +1,4 @@
-{% load bleach_tags score_tags static %}
+{% load score_tags static %}
 
 <div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}" data-thread-id="{{ message.thread_reply_id }}" data-author-id="{{ message.author.pk }}" data-author="{{ message.author.username }}">
   <div class="header">
@@ -23,7 +23,7 @@
     <img src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
   </div>
-  <div class="text">{{ message.text|bleach|nl2br }}</div>
+  <div class="text">{{ message.text|safe }}</div>
 </div>
 
 {% if not message.thread %}

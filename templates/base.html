@@ -24,12 +24,12 @@
         |
         <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
         |
-        {% if new_posts >= 0 %}
-          nové příspěvky: {{ new_posts }}
-          |
-        {% endif %}
         {% if request.path != "/" %}
           <a href="{% url "home" %}">místnosti</a>
+          |
+        {% endif %}
+        {% if new_posts >= 0 %}
+          nové příspěvky: {{ new_posts }}
           |
         {% endif %}
         <a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})

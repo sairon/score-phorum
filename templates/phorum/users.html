@@ -3,16 +3,16 @@
 {% block title %}Uživatelé | {% endblock %}
 
 {% block content %}
-  <table>
+  <table class="users-list">
     <tbody>
       {% for session in sessions %}
         <tr>
-          <td>{{ session.user.username }}</td>
-          <td>
+          <td class="user">{{ session.user.username }}</td>
+          <td class="last-action">
             {% if session.get_decoded.last_action.url %}<a href="{{ session.get_decoded.last_action.url }}">{{ session.get_decoded.last_action.name }}</a>
             {% else %}{{ session.get_decoded.last_action.name }}{% endif %}
           </td>
-          <td>{{ session.user.motto }}</td>
+          <td class="motto">{{ session.user.motto }}</td>
         </tr>
       {% endfor %}
     </tbody>

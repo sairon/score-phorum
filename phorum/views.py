@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import redirect, render, get_object_or_404
+from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
 
 from .forms import (
@@ -168,6 +169,7 @@ def message_send(request, room_slug):
     return room_view(request, room_slug)
 
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 def room_list(request):
     rooms = Room.objects.annotate(total_messages=Count("publicmessage"),
                                   last_message_time=Max("publicmessage__created"))

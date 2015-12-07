@@ -32,6 +32,7 @@ def active_users(request):
 
     active_users_count = Session.objects\
         .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
+        .distinct('user__username')\
         .count()
 
     return {

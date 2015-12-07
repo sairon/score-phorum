@@ -273,7 +273,8 @@ def users(request):
     sessions = Session.objects\
         .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
         .prefetch_related('user')\
-        .order_by('user__username')
+        .order_by('user__username')\
+        .distinct('user__username')
 
     return render(request, "phorum/users.html", {
         'sessions': sessions

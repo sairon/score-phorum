@@ -3,9 +3,6 @@
 <head>
   <meta charset="utf-8">
   <title>{% block title %}{% endblock %}Score Phorum v4.0</title>
-  <!--[if lt IE 9]>
-        <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
   <link rel="stylesheet" href="{% static "css/screen.css" %}">
   <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
 </head>
@@ -47,6 +44,7 @@
 
   {% block content %}{% endblock %}
 
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   {% block extra_body %}{% endblock %}
 </body>
 </html>

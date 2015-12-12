@@ -1,27 +1,17 @@
-if (!Element.prototype.hasClass) {
-  Element.prototype.hasClass = function(className) {
-    return new RegExp('(^| )' + className + '( |$)', 'gi').test(this.className);
-  }
-}
-
-Element.prototype.firstAncestorOfClass = function(className) {
-  var el = this;
-  while ((el = el.parentElement) && !el.hasClass(className)) {}
-  return el;
-};
-
-var replyEls = document.querySelectorAll(".send-reply");
-
-Array.prototype.forEach.call(replyEls, function(el, i) {
-  el.addEventListener('click', function(e) {
-    var rootMessage = el.firstAncestorOfClass('message');
-
-    var recipientInput = document.getElementById("id_recipient");
+(function(document, window, $) {
+  $('.send-reply').click(function(e) {
+    var rootMessage = $(this).closest('.message');
+    var recipientInput = $('#id_recipient'),
+      threadInput = $('#id_thread');
     if (recipientInput) {
-      recipientInput.value = rootMessage.getAttribute('data-author');
-      document.getElementById("id_thread").value = rootMessage.getAttribute('data-thread-id');
+      recipientInput.val(rootMessage.data('author'));
+      threadInput.val(rootMessage.data('thread-id'));
       window.scrollTo(0, 0);
-      document.getElementById("id_text").focus();
+      $('#id_text').focus();
     }
   });
-});
+
+  $('#id_recipient').on('change paste input', function(e) {
+    $("#id_thread").val("");
+  });
+})(document, window, jQuery);

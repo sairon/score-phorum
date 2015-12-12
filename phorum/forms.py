@@ -1,7 +1,6 @@
 # coding=utf-8
 import os
 from autoslug.settings import slugify
-from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
     UserChangeForm as DefaultUserChangeForm,
@@ -10,6 +9,7 @@ from django.contrib.auth.forms import (
 from django.contrib.auth.hashers import check_password
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
+import floppyforms as forms
 
 from .models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
 

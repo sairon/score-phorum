@@ -1,6 +1,6 @@
 {% if messages %}
   {% for message in messages %}
-    <div class="message{% if message.tags %} {{ message.tags }}{% endif %}">
+    <div class="flash-message{% if message.tags %} {{ message.tags }}{% endif %}">
       {{ message }}
     </div>
   {% endfor %}

@@ -54,6 +54,10 @@ class BaseMessageForm(forms.ModelForm):
             'recipient': forms.TextInput,
         }
 
+    def __init__(self, *args, **kwargs):
+        self.author = kwargs.pop('author')
+        super(BaseMessageForm, self).__init__(*args, **kwargs)
+
     def clean_recipient(self):
         recipient_name = self.cleaned_data.get("recipient") or None
         recipient = None
@@ -64,21 +68,35 @@ class BaseMessageForm(forms.ModelForm):
                 raise forms.ValidationError(u"Uživatel s přezdívkou '%s' neexistuje." % recipient_name)
         return recipient
 
-    def save(self, commit=True, author=None):
+    def save(self, commit=True):
         message = super(BaseMessageForm, self).save(False)
-        message.author = author
+        message.author = self.author
         if commit:
             message.save()
         return message
 
 
 class PrivateMessageForm(BaseMessageForm):
+    error_messages = {
+        'invalid_thread': "Není možné zaslat zprávu do požadovaného vlákna."
+    }
+
     def __init__(self, *args, **kwargs):
         super(PrivateMessageForm, self).__init__(*args, **kwargs)
         self.fields['recipient'].required = True
 
     class Meta(BaseMessageForm.Meta):
         model = PrivateMessage
+
+    def clean_thread(self):
+        thread = self.cleaned_data.get('thread')
+        if thread:
+            if self.author not in (thread.author, thread.recipient):
+                raise forms.ValidationError(
+                    self.error_messages['invalid_thread'],
+                    code='invalid_thread',
+                )
+        return thread
 
 
 class PublicMessageForm(BaseMessageForm):
@@ -88,8 +106,8 @@ class PublicMessageForm(BaseMessageForm):
         model = PublicMessage
         fields = ('recipient', 'to_inbox', 'text', 'thread')
 
-    def save(self, commit=True, author=None, room=None):
-        message = super(PublicMessageForm, self).save(False, author=author)
+    def save(self, commit=True, room=None):
+        message = super(PublicMessageForm, self).save(False)
         message.room = room
         if commit:
             message.save()

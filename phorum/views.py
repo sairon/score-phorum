@@ -71,7 +71,7 @@ def room_view(request, room_slug):
         'new_posts': new_posts,
         'threads': threads,
         'last_visit_time': last_visit_time,
-        'message_form': PublicMessageForm(request.POST or None),
+        'message_form': PublicMessageForm(request.POST or None, author=request.user),
         'login_form': LoginForm(),
     })
 
@@ -143,17 +143,17 @@ def inbox(request):
     return render(request, "phorum/inbox.html", {
         'threads': threads,
         'last_visit_time': last_visit_time,
-        'message_form': PrivateMessageForm(request.POST or None),
+        'message_form': PrivateMessageForm(request.POST or None, author=request.user),
     })
 
 
 @require_POST
 def inbox_send(request):
-    message_form = PrivateMessageForm(request.POST or None)
+    message_form = PrivateMessageForm(request.POST or None, author=request.user)
 
     if request.user.is_authenticated():
         if message_form.is_valid():
-            message_form.save(author=request.user)
+            message_form.save()
             return redirect("inbox")
         else:
             messages.error(request, "Formulář se zprávou obsahuje chyby.")
@@ -165,7 +165,7 @@ def inbox_send(request):
 
 @require_POST
 def message_send(request, room_slug):
-    message_form = PublicMessageForm(request.POST or None)
+    message_form = PublicMessageForm(request.POST or None, author=request.user)
     room = get_object_or_404(Room, slug=room_slug)
 
     if request.user.is_authenticated():

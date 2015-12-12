@@ -9,6 +9,7 @@ from django.contrib.auth.forms import (
 from django.contrib.auth.hashers import check_password
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
+from django.utils.translation import ugettext_lazy as _
 import floppyforms as forms
 
 from .models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
@@ -102,11 +103,73 @@ class AdminUserChangeForm(DefaultUserChangeForm):
 
 
 class UserChangeForm(forms.ModelForm):
+    error_messages = {
+        'password_mismatch': _("The two password fields didn't match."),
+        'password_incorrect': _("Your old password was entered incorrectly. "
+                                "Please enter it again."),
+    }
     avatar = AvatarImageField(required=False)
+    old_password = forms.CharField(label=_("Old password"),
+                                   required=False,
+                                   widget=forms.PasswordInput)
+    new_password1 = forms.CharField(label=_("New password"),
+                                    required=False,
+                                    widget=forms.PasswordInput)
+    new_password2 = forms.CharField(label=_("New password confirmation"),
+                                    required=False,
+                                    widget=forms.PasswordInput)
 
     class Meta:
         model = User
         fields = ('email', 'motto', 'avatar')
+
+    def clean_old_password(self):
+        """
+        Validates that the old_password field is correct.
+        """
+        old_password = self.cleaned_data.get("old_password")
+
+        # check old password only if user is trying to change the password
+        if old_password and not self.instance.check_password(old_password):
+            raise forms.ValidationError(
+                self.error_messages['password_incorrect'],
+                code='password_incorrect',
+            )
+        return old_password
+
+    def clean_new_password2(self):
+        password1 = self.cleaned_data.get('new_password1')
+        password2 = self.cleaned_data.get('new_password2')
+        if password1 and password2:
+            if password1 != password2:
+                raise forms.ValidationError(
+                    self.error_messages['password_mismatch'],
+                    code='password_mismatch',
+                )
+        return password2
+
+    def clean(self):
+        old_password = self.cleaned_data.get("old_password")
+        password1 = self.cleaned_data.get('new_password1')
+        password2 = self.cleaned_data.get('new_password2')
+        if password1 and not old_password:
+            raise forms.ValidationError(
+                self.error_messages['password_incorrect'],
+                code='password_incorrect',
+            )
+        if (password1 and not password2) or (password2 and not password1):
+            raise forms.ValidationError(
+                self.error_messages['password_mismatch'],
+                code='password_mismatch',
+            )
+
+    def save(self, commit=True):
+        user = super(UserChangeForm, self).save(False)
+        if self.cleaned_data['new_password1']:
+            user.set_password(self.cleaned_data['new_password1'])
+        if commit:
+            user.save()
+        return user
 
 
 class UserCreationForm(DefaultUserCreationForm):

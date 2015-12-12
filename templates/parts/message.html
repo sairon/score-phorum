@@ -1,10 +1,13 @@
 {% load score_tags static %}
 
-<div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}" data-thread-id="{{ message.thread_reply_id }}" data-author-id="{{ message.author.pk }}" data-author="{{ message.author.username }}">
+<div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}"
+     data-thread-id="{{ message.thread_reply_id }}"
+     data-author-id="{{ message.author.pk }}"
+     data-author="{{ message.author.username }}">
   <div class="header">
     <div class="flags">
       {% if request.user.is_authenticated %}
-        {% if not last_visit_time or message.created > last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
+        {% if message|is_newer_than:last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
         <img src="{% static "img/message-icon.gif" %}" class="send-reply">
       {% endif %}
     </div>

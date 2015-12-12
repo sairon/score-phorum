@@ -1,6 +1,4 @@
 from django import template
-from django.utils.html import escape
-from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -10,6 +8,13 @@ def new_posts(room, visits):
     if not visits:
         return None
     return visits.get(room.id, room.total_messages)
+
+
+@register.filter
+def is_newer_than(message, compared_time=None):
+    if not compared_time:
+        return True
+    return message.created > compared_time
 
 
 @register.filter

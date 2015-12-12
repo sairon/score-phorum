@@ -1,9 +1,11 @@
+from collections import defaultdict
+
 from autoslug.fields import AutoSlugField
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.mail import send_mail
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_bleach.models import BleachField
@@ -236,6 +238,19 @@ class PublicMessage(Message):
         elif user in (self.room.author, self.room.moderator):
             return True
         return False
+
+    def delete(self, using=None):
+        authors_post_counts = defaultdict(int)
+        if self.children:
+            for child in self.children.all():
+                authors_post_counts[child.author] += 1
+        with transaction.atomic():
+            # delete message
+            super(PublicMessage, self).delete(using)
+            # and decrease kredyti
+            for author, post_count in authors_post_counts.iteritems():
+                author.decrease_kredyti(post_count)
+                print authors_post_counts
 
 
 class PrivateMessage(Message):

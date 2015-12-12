@@ -204,7 +204,8 @@ def message_delete(request, message_id):
 
     if message.can_be_deleted_by(request.user):
         if not is_private:
-            message.author.decrease_kredyti()
+            kredyti_penalty = 1 if request.user == message.author else 5
+            message.author.decrease_kredyti(kredyti_penalty)
         message.delete()
         messages.info(request, "Zpráva byla smazána.")
     else:

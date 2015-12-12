@@ -114,6 +114,15 @@ class UserCreationForm(DefaultUserCreationForm):
         model = User
         fields = ('username', 'email', 'motto')
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError(
+                User._meta.get_field('username').error_messages['unique'],
+                code='unique',
+            )
+        return username
+
 
 class RoomCreationForm(forms.ModelForm):
     def clean_name(self):

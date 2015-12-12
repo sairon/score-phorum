@@ -120,6 +120,8 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'phorum.User'
 
+AUTHENTICATION_BACKENDS = ('phorum.backends.CaseInsensitiveModelBackend',)
+
 LOGIN_URL = "/"
 LOGOUT_URL = "/logout"
 

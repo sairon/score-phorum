@@ -1,0 +1,14 @@
+<div class="room-meta">
+  <table>
+    <thead>
+      <tr><th colspan="2">{{ room.name }}</th></tr>
+    </thead>
+
+    <tbody>
+      <tr><th>Vytvořeno</th><td>{{ room.created }}</td></tr>
+      {% if room.author %}<tr><th>Autor</th><td>{{ room.author }}</td></tr>{% endif %}
+      {% if room.moderator %}<tr><th>Moderátor</th><td>{{ room.moderator }}</td></tr>{% endif %}
+      {% if request.user == room.author %}<tr><td colspan="2"><a href="{% url "room_edit" room_slug=room.slug %}">Upravit místnost</a></td></tr>{% endif %}
+    </tbody>
+  </table>
+</div>

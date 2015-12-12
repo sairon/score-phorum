@@ -126,7 +126,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'motto', 'avatar')
+        fields = ('email', 'motto', 'avatar', 'max_thread_roots')
 
     def clean_old_password(self):
         """

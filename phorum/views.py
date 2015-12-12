@@ -42,7 +42,9 @@ def room_view(request, room_slug):
         .order_by("-last_reply") \
         .prefetch_related("author", "children__author", "children__recipient", "room", "children__room")
 
-    paginator = Paginator(threads, 10)
+    max_threads = request.user.max_thread_roots if request.user.is_authenticated() else 10
+
+    paginator = Paginator(threads, max_threads)
     threads = paginator.page(page_number)
 
     last_visit_time = None
@@ -131,7 +133,7 @@ def inbox(request):
         .order_by("-last_reply") \
         .prefetch_related("author", "children__author", "children__recipient")
 
-    paginator = Paginator(threads, 10)
+    paginator = Paginator(threads, request.user.max_thread_roots)
     threads = paginator.page(page_number)
 
     last_visit_time = request.user.inbox_visit_time

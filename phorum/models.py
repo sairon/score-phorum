@@ -1,3 +1,4 @@
+# coding=utf-8
 from collections import defaultdict
 
 from autoslug.fields import AutoSlugField
@@ -5,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.mail import send_mail
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -67,6 +69,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     room_keyring = models.ManyToManyField("Room", through="UserRoomKeyring")
     inbox_visit_time = models.DateTimeField(null=True, blank=True)
     last_ip = models.GenericIPAddressField(null=True, blank=True)
+    max_thread_roots = models.SmallIntegerField(default=10, verbose_name="počet threadů na stránku",
+                                                validators=[MinValueValidator(1), MaxValueValidator(50)])
 
     class Meta:
         verbose_name = _('user')

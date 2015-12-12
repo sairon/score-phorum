@@ -1,0 +1,3 @@
+-r production.txt
+
+mock==1.3.0

@@ -4,7 +4,7 @@
 {% block title %}Osobka | {% endblock %}
 
 {% block content %}
-  <form action="{% url "inbox_send" %}" method="post" autocomplete="off">
+  <form class="message-form" action="{% url "inbox_send" %}" method="post" autocomplete="off">
     {% csrf_token %}
     {{ message_form.as_p }}
     <input type="submit" value="Odeslat">

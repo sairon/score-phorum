@@ -119,6 +119,9 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'phorum.User'
 
+LOGIN_URL = "/"
+LOGOUT_URL = "/logout"
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -7,9 +7,11 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
+from django.core.urlresolvers import reverse
 from django.db.models import Count, Max, Q
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import redirect, render, get_object_or_404
+from django.utils.http import is_safe_url
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
 from django.views.decorators.http import require_POST
@@ -191,6 +193,7 @@ def room_list(request):
         'rooms': rooms,
         'login_form': LoginForm(),
         'visits': visits,
+        'next': request.POST.get("next", request.GET.get("next", "")),
     })
 
 
@@ -221,12 +224,18 @@ def login(request):
             auth_login(request, form.get_user())
             request.user.last_ip = get_ip_addr(request)
             request.user.save(update_fields=['last_ip'])
+            redirect_to = request.POST.get("next",
+                                           request.GET.get("next", ""))
+            if not is_safe_url(url=redirect_to, host=request.get_host()):
+                redirect_to = reverse("home")
+            return HttpResponseRedirect(redirect_to)
         else:
             user = form.get_user()
             if user and not user.is_active:
                 messages.info(request, "Uživatelský účet není aktivní.")
             else:
                 messages.error(request, "Neplatný login nebo heslo.")
+                return room_list(request)
 
     return redirect("home")
 

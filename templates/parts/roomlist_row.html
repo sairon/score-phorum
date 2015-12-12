@@ -5,8 +5,10 @@
   <td><a href="{% url "room_view" room_slug=room.slug %}">{{ room.name }}</a></td>
   <td>
     {% if room.total_messages %}
-      <span class="post-count">{% if request.user.is_authenticated %} {{ room|new_posts:visits }} /{% endif %}
-      {{ room.total_messages }}</span>
+      <span class="post-count">
+        {% if request.user.is_authenticated and room|new_posts:visits != room.total_messages%} {{ room|new_posts:visits }} /{% endif %}
+        {{ room.total_messages }}
+      </span>
       |
       {{ room.last_message_time|date:"d.m H:i" }}
     {% else %}

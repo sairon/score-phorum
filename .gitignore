@@ -1,5 +1,6 @@
 *.py[cod]
 *.s[ac]ssc
+/.vagrant
 /media/*
 /static/*
 local_settings.json

@@ -7,42 +7,44 @@
   <link rel="shortcut icon" href="{% static "img/favicon.png" %}">
 </head>
 <body>
-  <div class="top-menu">
-    {% if login_form and request.user.is_anonymous%}
-      <form action="{% url "login" %}" method="post">
-        {% csrf_token %}
-        {{ login_form }}
-        <input type="hidden" name="next" value="{{ next }}">
-        <input type="submit" value="Login">
-      </form>
+  <div id="content">
+    <div class="top-menu">
+      {% if login_form and request.user.is_anonymous%}
+        <form action="{% url "login" %}" method="post">
+          {% csrf_token %}
+          {{ login_form }}
+          <input type="hidden" name="next" value="{{ next }}">
+          <input type="submit" value="Login">
+        </form>
 
-      | <a href="{{ request.get_full_path }}">refresh</a> |
-    {% elif request.user.is_authenticated %}
-        |
-        <a href="{% url "user_edit" %}">{{ request.user.username }}</a>
-        |
-        <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
-        |
-        {% if request.path != "/" %}
-          <a href="{% url "home" %}">místnosti</a>
+        | <a href="{{ request.get_full_path }}">refresh</a> |
+      {% elif request.user.is_authenticated %}
           |
-        {% endif %}
-        {% if new_posts >= 0 %}
-          nové příspěvky: {{ new_posts }}
+          <a href="{% url "user_edit" %}">{{ request.user.username }}</a>
           |
-        {% endif %}
-        <a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})
-        |
-        <a href="{{ request.get_full_path }}">refresh</a>
-        |
-        <a href="{% url "logout" %}">odhlásit</a>
-        |
-    {% endif %}
+          <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
+          |
+          {% if request.path != "/" %}
+            <a href="{% url "home" %}">místnosti</a>
+            |
+          {% endif %}
+          {% if new_posts >= 0 %}
+            nové příspěvky: {{ new_posts }}
+            |
+          {% endif %}
+          <a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})
+          |
+          <a href="{{ request.get_full_path }}">refresh</a>
+          |
+          <a href="{% url "logout" %}">odhlásit</a>
+          |
+      {% endif %}
+    </div>
+
+    {% include "snippets/messages.html" with messages=messages only %}
+
+    {% block content %}{% endblock %}
   </div>
-
-  {% include "snippets/messages.html" with messages=messages only %}
-
-  {% block content %}{% endblock %}
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   {% block extra_body %}{% endblock %}

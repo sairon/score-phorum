@@ -1,4 +1,5 @@
 # coding=utf-8
+from copy import copy
 from datetime import timedelta
 
 from django.conf import settings
@@ -173,6 +174,11 @@ def message_send(request, room_slug):
             return redirect("home")
 
         if message_form.is_valid():
+            if message_form.cleaned_data['to_inbox']:
+                if "thread" in request.POST:
+                    request.POST = copy(request.POST)
+                    del request.POST['thread']
+                return inbox_send(request)
             message_form.save(author=request.user, room=room)
             request.user.increase_kredyti()
             return redirect("room_view", room_slug=room.slug)

@@ -82,8 +82,11 @@ class PrivateMessageForm(BaseMessageForm):
 
 
 class PublicMessageForm(BaseMessageForm):
+    to_inbox = forms.BooleanField(required=False)
+
     class Meta(BaseMessageForm.Meta):
         model = PublicMessage
+        fields = ('recipient', 'to_inbox', 'text', 'thread')
 
     def save(self, commit=True, author=None, room=None):
         message = super(PublicMessageForm, self).save(False, author=author)

@@ -16,4 +16,9 @@
     $("#id_thread").val("");
     $("#id_recipient").removeClass("reply");
   });
+
+  $('#id_to_inbox').on('change', function(e) {
+    $("#id_thread").val("");
+    $("#id_recipient").removeClass("reply");
+  });
 })(document, window, jQuery);

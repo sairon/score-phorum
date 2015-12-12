@@ -1,0 +1,6 @@
+{% load i18n %}{% if value.url %}<img src="{{ value.url }}">
+<input type="checkbox" name="{{ checkbox_name }}" id="{{ checkbox_id }}">
+<label for="{{ checkbox_id }}">{% trans "Clear" %}</label>
+<br>{% trans "Change:" %}
+{% endif %}
+<input type="{{ type }}" name="{{ name }}"{% if required %} required{% endif %}{% include "floppyforms/attrs.html" %}>

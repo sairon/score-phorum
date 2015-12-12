@@ -102,13 +102,18 @@ class AdminUserChangeForm(DefaultUserChangeForm):
         model = User
 
 
+class AvatarInput(forms.widgets.ClearableFileInput):
+    template_name = "widgets/avatar.html"
+
+
 class UserChangeForm(forms.ModelForm):
     error_messages = {
         'password_mismatch': _("The two password fields didn't match."),
         'password_incorrect': _("Your old password was entered incorrectly. "
                                 "Please enter it again."),
     }
-    avatar = AvatarImageField(required=False)
+    avatar = AvatarImageField(required=False,
+                              widget=AvatarInput)
     old_password = forms.CharField(label=_("Old password"),
                                    required=False,
                                    widget=forms.PasswordInput)

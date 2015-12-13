@@ -6,7 +6,7 @@ register = template.Library()
 @register.filter
 def new_posts(room, visits):
     if not visits:
-        return None
+        return room.total_messages
     return visits.get(room.id, room.total_messages)
 
 

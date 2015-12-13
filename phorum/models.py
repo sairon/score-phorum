@@ -208,6 +208,15 @@ class Message(models.Model):
         abstract = True
         ordering = ['created']
 
+    def save(self, *args, **kwargs):
+        super(Message, self).save(*args, **kwargs)
+        if self.thread:
+            # update last_reply on parent
+            root = self.__class__.objects.get(pk=self.thread.pk)
+            root.last_reply = self.created
+            root.save()
+        return self
+
     @property
     def thread_reply_id(self):
         return self.thread_id or self.pk
@@ -222,15 +231,6 @@ class Message(models.Model):
 
 class PublicMessage(Message):
     room = models.ForeignKey(Room)
-
-    def save(self, *args, **kwargs):
-        super(PublicMessage, self).save(*args, **kwargs)
-        if self.thread:
-            # update last_reply on parent
-            root = PublicMessage.objects.get(pk=self.thread.pk)
-            root.last_reply = self.created
-            root.save()
-        return self
 
     def can_be_deleted_by(self, user):
         can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)

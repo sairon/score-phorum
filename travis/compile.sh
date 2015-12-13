@@ -36,7 +36,7 @@ GITIGNORE
 
 if [[ -z ${TRAVIS_BRANCH} ]]; then DEPLOY_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 else DEPLOY_BRANCH=${TRAVIS_BRANCH}; fi
-DEPLOY_HASH=$(git log -n1 --pretty="%t")
+DEPLOY_HASH=$(git log -n1 --pretty="%H")
 
 (
     cd deployment
@@ -45,5 +45,5 @@ DEPLOY_HASH=$(git log -n1 --pretty="%t")
     git config user.email "travis@scorephorum.cz"
     git add .
     git commit -m "Deployment of https://github.com/sairon/score-phorum/commit/${DEPLOY_HASH}"
-    git push -f -q "https://${GH_TOKEN}@${GH_REF}" master:deploy-${DEPLOY_BRANCH} > /dev/null 2>&1
-)
+    git push -f -q "https://${GH_TOKEN}@${GH_REF}" master:deploy-${DEPLOY_BRANCH} > /dev/null 2>&1 || exit 1
+) || echo "Pushing to the GH repository failed" >&2

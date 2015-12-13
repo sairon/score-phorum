@@ -27,3 +27,8 @@ script:
   - python manage.py makemigrations phorum  # TODO: should be removed after adding migrations to git
   - python manage.py test
   - bash travis/compile.sh
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always

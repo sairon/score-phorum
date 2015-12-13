@@ -1,6 +1,8 @@
 *.py[cod]
 *.s[ac]ssc
+/phorum/static/css/screen.css
 /.vagrant
+/deployment
 /media/*
 /static/*
 local_settings.json

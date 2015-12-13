@@ -9,6 +9,8 @@ services:
 env:
   global:
     - DJANGO_SETTINGS_MODULE="score.settings.tests"
+    - GH_REF="github.com/sairon/score-phorum"
+    - secure: "Cfd0cjXuz6vhlT+lD9jvNHrJyFUni1lz6Dv8FOLjh/8Oy9mbvxjpUkJJXrRzVhx4hwpWhrUV8w1Vtl1+IHYYHL6zJF7kf4XxJ9WG2jn00Fqk1Y3hUBynQ4Hyak1nE4tlXOMJ7yUKu85GXQyZT3vZhcQr6ibcevXI349EZYawiDQ+QQyNosiCPNQqN7R2f7flJSBUp8Y7teg6Dqu+n64FJruMsyAX2Bh62UmjqYZZO541ax061DoIpO82ZN1eKIDe/6mEvRuEQh1uEH6dFe5ZnmOg+ub7rexb7yDaU6WJ2SQGVZ7eoFuvE4DCrnKWAKGSzPi4J0Bfo3kW+AepalUn9N/YLhQOK8UcY8rdMMYMbxrYPxOJw1Oama7K0s8sijZgOcLUMQmKpC+3QVRzXLqqzOteTHnh38UMOv4w4jXOIwRu8uLYvijXmDML5Xh5n3RKv3JS/V8ahN1erSY8H4uhXCBr9N0hAtWSZgpLJ4C9fON/QUaUP0W7s7tAeesYktZ3Bk/uvc6cAHQbmdiAI+BvsA6CssKMhdv+fn4aLTHctln/W9WSmJ6Xy6iPzyMasByQXbo8R5kd396wvY6BM+Qiia5PWMHWzVCIYrwNvpi+zQMCvaTM8BJkkVy6oKAqXLKd+2gOduDBfSsMPceHNXqXARcOL8xMH/7Dce0RE8ezinE="
 
 python:
   - 2.7
@@ -19,7 +21,9 @@ install:
 before_script:
   - psql -c 'create database score' -U postgres
   - cp score/settings/local_settings.json.travis score/settings/local_settings.json
+  - gem install compass -v 1.0.3
 
 script:
   - python manage.py makemigrations phorum  # TODO: should be removed after adding migrations to git
   - python manage.py test
+  - bash travis/compile.sh

@@ -13,18 +13,18 @@ rm -rf deployment
 mkdir deployment
 
 # copy files to deployment directory
-rsync -av . deployment/ \
-    --exclude .git \
-    --exclude .gitignore \
-    --exclude .travis.yml \
-    --exclude deployment \
-    --exclude dev \
-    --exclude travis \
-    --exclude static \
-    --exclude vagrant \
-    --exclude Vagrantfile \
-    --exclude phorum/static/.sass-cache \
-    --exclude phorum/static/sass
+rsync -avR . deployment/ \
+    --exclude /deployment \
+    --exclude /.git \
+    --exclude /.gitignore \
+    --exclude /.travis.yml \
+    --exclude /dev \
+    --exclude /travis \
+    --exclude /static \
+    --exclude /vagrant \
+    --exclude /Vagrantfile \
+    --exclude /phorum/static/.sass-cache \
+    --exclude /phorum/static/sass
 
 # create .gitignore for deployment
 cat > deployment/.gitignore <<GITIGNORE

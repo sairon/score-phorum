@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import check_password
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
 from django.utils.translation import ugettext_lazy as _
-import floppyforms as forms
+import floppyforms.__future__ as forms
 
 from .models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
 

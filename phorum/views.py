@@ -179,7 +179,7 @@ def message_send(request, room_slug):
                     request.POST = copy(request.POST)
                     del request.POST['thread']
                 return inbox_send(request)
-            message_form.save(author=request.user, room=room)
+            message_form.save(room=room)
             request.user.increase_kredyti()
             return redirect("room_view", room_slug=room.slug)
         else:

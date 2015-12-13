@@ -1,0 +1,22 @@
+language: python
+
+services:
+  - postgresql
+
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE="score.settings.tests"
+
+python:
+  - 2.7
+
+install:
+  - pip install -r requirements/tests.txt
+
+before_script:
+  - psql -c 'create database score' -U postgres
+  - cp score/settings/local_settings.json.travis score/settings/local_settings.json
+
+script:
+  - python manage.py makemigrations phorum  # TODO: should be removed after adding migrations to git
+  - python manage.py test

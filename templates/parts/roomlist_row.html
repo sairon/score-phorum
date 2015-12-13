@@ -6,8 +6,7 @@
   <td>
     {% if room.total_messages %}
       <span class="post-count">
-        {% if request.user.is_authenticated and room|new_posts:visits != room.total_messages%} {{ room|new_posts:visits }} /{% endif %}
-        {{ room.total_messages }}
+        {% if request.user.is_authenticated and room|new_posts:visits != room.total_messages%}{{ room|new_posts:visits }}/{% endif %}{{ room.total_messages }}
       </span>
       |
       {{ room.last_message_time|date:"d.m H:i" }}

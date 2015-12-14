@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.http import is_safe_url
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
+from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_POST
 from user_sessions.models import Session
 
@@ -76,6 +77,7 @@ def room_view(request, room_slug):
     })
 
 
+@sensitive_post_parameters("password")
 @login_required
 def room_password_prompt(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
@@ -90,6 +92,7 @@ def room_password_prompt(request, room_slug):
     })
 
 
+@sensitive_post_parameters("password")
 @login_required
 def room_new(request):
     form = RoomCreationForm(request.POST or None)
@@ -104,6 +107,7 @@ def room_new(request):
     })
 
 
+@sensitive_post_parameters("password")
 @login_required
 def room_edit(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
@@ -226,6 +230,7 @@ def message_delete(request, message_id):
     return redirect("room_view", room_slug=message_room_slug)
 
 
+@sensitive_post_parameters()
 def login(request):
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)
@@ -254,6 +259,7 @@ def logout(request):
     return redirect("home")
 
 
+@sensitive_post_parameters("password1", "password2")
 def user_new(request):
     form = UserCreationForm(request.POST or None)
 
@@ -268,6 +274,7 @@ def user_new(request):
     })
 
 
+@sensitive_post_parameters("old_password", "new_password1", "new_password2")
 @login_required
 def user_edit(request):
     form = UserChangeForm(request.POST or None, request.FILES or None,

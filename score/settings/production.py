@@ -16,3 +16,5 @@ SERVER_EMAIL = "noreply@scorephorum.cz"
 ADMINS = (
     ("Jan Cermak", "sairon@sairon.cz"),
 )
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'

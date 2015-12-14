@@ -35,6 +35,11 @@ cat > deployment/.gitignore <<GITIGNORE
 local_settings.json
 GITIGNORE
 
+if [[ -z ${GH_TOKEN} ]]; then
+    echo "Compilation succeeded but no GH_TOKEN was given."
+    exit 0
+fi
+
 if [[ -z ${TRAVIS_BRANCH} ]]; then DEPLOY_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 else DEPLOY_BRANCH=${TRAVIS_BRANCH}; fi
 DEPLOY_HASH=$(git log -n1 --pretty="%H")

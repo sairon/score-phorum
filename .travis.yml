@@ -1,5 +1,10 @@
 language: python
 
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.rvm
+
 addons:
   postgresql: "9.3"
 
@@ -17,11 +22,12 @@ python:
 
 install:
   - pip install -r requirements/tests.txt
+  - rvm use 2.2.4 --install
+  - bundle install  --jobs=3 --retry=3 --frozen
 
 before_script:
   - psql -c 'create database score' -U postgres
   - cp score/settings/local_settings.json.travis score/settings/local_settings.json
-  - gem install compass -v 1.0.3
 
 script:
   - python manage.py makemigrations phorum  # TODO: should be removed after adding migrations to git

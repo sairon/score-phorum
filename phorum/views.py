@@ -152,44 +152,40 @@ def inbox(request):
 
 
 @require_POST
+@login_required
 def inbox_send(request):
     message_form = PrivateMessageForm(request.POST or None, author=request.user)
 
-    if request.user.is_authenticated():
-        if message_form.is_valid():
-            message_form.save()
-            return redirect("inbox")
-        else:
-            messages.error(request, "Formulář se zprávou obsahuje chyby.")
+    if message_form.is_valid():
+        message_form.save()
+        return redirect("inbox")
     else:
-        messages.error(request, "Pro zasílání zpráv musíte být přihlášen.")
+        messages.error(request, "Formulář se zprávou obsahuje chyby.")
 
     return inbox(request)
 
 
 @require_POST
+@login_required
 def message_send(request, room_slug):
     message_form = PublicMessageForm(request.POST or None, author=request.user)
     room = get_object_or_404(Room, slug=room_slug)
 
-    if request.user.is_authenticated():
-        if room.protected and not user_can_view_protected_room(request.user, room):
-            messages.error(request, "Do místnosti, do které zasíláte zprávu, již nemáte přístup.")
-            return redirect("home")
+    if room.protected and not user_can_view_protected_room(request.user, room):
+        messages.error(request, "Do místnosti, do které zasíláte zprávu, již nemáte přístup.")
+        return redirect("home")
 
-        if message_form.is_valid():
-            if message_form.cleaned_data['to_inbox']:
-                if "thread" in request.POST:
-                    request.POST = copy(request.POST)
-                    del request.POST['thread']
-                return inbox_send(request)
-            message_form.save(room=room)
-            request.user.increase_kredyti()
-            return redirect("room_view", room_slug=room.slug)
-        else:
-            messages.error(request, "Formulář se zprávou obsahuje chyby.")
+    if message_form.is_valid():
+        if message_form.cleaned_data['to_inbox']:
+            if "thread" in request.POST:
+                request.POST = copy(request.POST)
+                del request.POST['thread']
+            return inbox_send(request)
+        message_form.save(room=room)
+        request.user.increase_kredyti()
+        return redirect("room_view", room_slug=room.slug)
     else:
-        messages.error(request, "Pro zasílání zpráv musíte být přihlášen.")
+        messages.error(request, "Formulář se zprávou obsahuje chyby.")
 
     return room_view(request, room_slug)
 

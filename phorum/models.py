@@ -254,7 +254,6 @@ class PublicMessage(Message):
             # and decrease kredyti
             for author, post_count in authors_post_counts.iteritems():
                 author.decrease_kredyti(post_count)
-                print authors_post_counts
 
 
 class PrivateMessage(Message):

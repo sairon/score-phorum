@@ -1,7 +1,21 @@
 .top-menu
   text-align: center
-  margin-bottom: 2rem
+  margin-bottom: 1em
   font-weight: bold
 
   label
     font-weight: normal
+
+  ul
+    li
+      line-height: 1.5em
+
+      +breakpoint($mobile-breakpoint)
+        line-height: 1em
+        display: inline
+        &:first-child
+          &::before
+            content: "| "
+
+        &::after
+          content: " | "

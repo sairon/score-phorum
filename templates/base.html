@@ -22,7 +22,7 @@
           |
           <a href="{% url "user_edit" %}">{{ request.user.username }}</a>
           |
-          <a href="{% url "inbox" %}">moje zprávy</a> ({{ inbox_unread_count }})
+          <a href="{% url "inbox" %}">moje zprávy</a> (<span class="inbox-new-messages">{{ inbox_unread_count }}</span>)
           |
           {% if request.path != "/" %}
             <a href="{% url "home" %}">místnosti</a>

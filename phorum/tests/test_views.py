@@ -1,3 +1,4 @@
+# coding=utf-8
 from datetime import datetime
 
 from django.core.urlresolvers import reverse
@@ -5,7 +6,7 @@ from django.test import TestCase, override_settings
 from user_sessions.utils.tests import Client
 
 from .utils import new_public_thread, public_reply
-from ..models import Room, User
+from ..models import PrivateMessage, Room, User
 
 
 class TestDataMixin(object):
@@ -128,3 +129,137 @@ class RoomViewTest(TestDataMixin, TestCase):
         # test that the user really can't access the room
         response = self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['protected'].slug}))
         self.assertRedirects(response, prompt_url)
+
+
+@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+class InboxText(TestDataMixin, TestCase):
+    client_class = Client
+
+    def _create_test_messages(self):
+        thread = PrivateMessage.objects.create(
+            author=self.user1, recipient=self.user2,
+            text="%new_thread%"
+        )
+        reply = PrivateMessage.objects.create(
+            author=self.user2, recipient=self.user1,
+            text="%new_thread_reply%", thread=thread
+        )
+        return thread, reply
+
+    def test_inbox_messages_present(self):
+        thread, reply = self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, thread.text)
+        self.assertContains(response, reply.text)
+
+    def test_inbox_unread_count(self):
+        self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, '<span class="inbox-new-messages">2</span>')
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, '<span class="inbox-new-messages">2</span>',
+                            msg_prefix="new messages count reset in the first visit of inbox")
+
+    def test_inbox_unread_count_resets(self):
+        self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, '<span class="inbox-new-messages">2</span>')
+        # visit inbox - reset should occur
+        self.client.get(reverse("inbox"))
+        # check homepage again
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, '<span class="inbox-new-messages">0</span>')
+
+    def test_can_send_message(self):
+        assert self.client.login(username="testclient1", password="password")
+        data = {
+            'recipient': self.user2.username,
+            'thread': "",
+            'text': "text"
+        }
+        response = self.client.post(reverse("inbox_send"), data)
+        self.assertRedirects(response, reverse("inbox"))
+
+    def test_can_reply_message(self):
+        thread, reply = self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        data = {
+            'recipient': self.user2.username,
+            'thread': thread.id,
+            'text': "%posted_reply%"
+        }
+        response = self.client.post(reverse("inbox_send"), data)
+        self.assertRedirects(response, reverse("inbox"), fetch_redirect_response=False)
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, data['text'])
+
+    def test_form_validation_message(self):
+        assert self.client.login(username="testclient1", password="password")
+        data = {
+            'recipient': self.user2.username,
+            'thread': "invalid",
+            'text': "%posted_reply%"
+        }
+        response = self.client.post(reverse("inbox_send"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Formulář se zprávou obsahuje chyby")
+
+    def test_can_delete_own_messages(self):
+        thread, reply = self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("message_delete",
+                                           kwargs={'message_id': thread.id}),
+                                   {'inbox': "1"})
+        self.assertRedirects(response, reverse("inbox"), fetch_redirect_response=False)
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, "Zpráva byla smazána")
+
+    def test_can_delete_received_messages(self):
+        thread, reply = self._create_test_messages()
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("message_delete",
+                                           kwargs={'message_id': reply.id}),
+                                   {'inbox': "1"})
+        self.assertRedirects(response, reverse("inbox"), fetch_redirect_response=False)
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, "Zpráva byla smazána")
+
+    def test_can_not_see_others_messages(self):
+        thread = PrivateMessage.objects.create(
+            author=self.user3, recipient=self.user2,
+            text="%new_thread%"
+        )
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("inbox"))
+        self.assertNotContains(response, thread.text)
+
+    def test_can_not_reply_others_messages(self):
+        thread = PrivateMessage.objects.create(
+            author=self.user3, recipient=self.user2,
+            text="%new_thread%"
+        )
+        assert self.client.login(username="testclient1", password="password")
+        data = {
+            'recipient': self.user2.username,
+            'thread': thread.id,
+            'text': "%posted_reply%"
+        }
+        response = self.client.post(reverse("inbox_send"), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Formulář se zprávou obsahuje chyby")
+
+    def test_can_not_delete_others_messages(self):
+        thread = PrivateMessage.objects.create(
+            author=self.user3, recipient=self.user2,
+            text="%new_thread%"
+        )
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("message_delete",
+                                           kwargs={'message_id': thread.id}),
+                                   {'inbox': "1"})
+        self.assertRedirects(response, reverse("inbox"), fetch_redirect_response=False)
+        response = self.client.get(reverse("inbox"))
+        self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")

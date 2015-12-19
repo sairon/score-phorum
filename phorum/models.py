@@ -8,6 +8,8 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.core.mail import send_mail
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
+from django.db.models import Q
+from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_bleach.models import BleachField
@@ -216,6 +218,17 @@ class Message(models.Model):
             root.last_reply = self.created
             root.save()
         return self
+
+    def delete(self, using=None):
+        with transaction.atomic():
+            super(Message, self).delete(using)
+            if self.thread:
+                max_date_in_thread = self.__class__.objects\
+                    .filter(Q(thread_id=self.thread_id) | Q(id=self.thread_id))\
+                    .aggregate(last_reply=Max("created"))['last_reply']
+                root = self.__class__.objects.get(pk=self.thread.pk)
+                root.last_reply = max_date_in_thread
+                root.save()
 
     @property
     def thread_reply_id(self):

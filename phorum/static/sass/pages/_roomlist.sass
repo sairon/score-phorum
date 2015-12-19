@@ -12,12 +12,24 @@
       width: 11px  // width of key icon
 
   tr
+    height: 2em
+
     &:nth-child(4n)
       background-color: $score-bg-color
 
     &:hover
       background-color: darken($score-bg-color, 5)
 
+    +breakpoint($mobile-breakpoint)
+      height: auto
+
+
   .unread
     .post-count
       font-weight: bold
+
+  .last-message-time
+    display: none
+
+    +breakpoint($mobile-breakpoint)
+      display: inline

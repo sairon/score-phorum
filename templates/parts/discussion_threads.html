@@ -1,5 +1,6 @@
 {% for thread in threads %}
   {% include "parts/message.html" with message=thread %}
+  {% if not forloop.last %}<hr class="thread-divider">{% endif %}
 {% endfor %}
 
 

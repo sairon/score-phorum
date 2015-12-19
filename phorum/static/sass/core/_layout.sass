@@ -1,12 +1,14 @@
 body
   background: #94ada5 inline_image("bgpattern.gif")
-  padding: 2em
+  padding: 1em 0.2em
+
+  +breakpoint($mobile-breakpoint)
+    padding: 2em
 
 #content
   margin: 0 auto
-  width: 80%
-  min-width: 50em
 
-img
-  max-width: 800px
-  max-height: 800px
+  +breakpoint($mobile-breakpoint)
+    width: 80%
+    min-width: 50em
+

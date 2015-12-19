@@ -1,27 +1,32 @@
 .message
   font-family: Tahoma, Arial, Helvetica, sans-serif
   color: #333
-
   +pie-clearfix
   position: relative
 
-  &.reply
-    margin-left: 45px
-
   .avatar
     position: absolute
+    width: 40px
+    right: 0
 
   .text
-    margin: 0.2em 0.2em 0.5em 42px
+    margin: 0.2em 42px 0.5em 0.2em
     min-height: 50px
     word-wrap: break-word
     line-height: normal
 
+  &.reply
+    margin-bottom: 0
+
+    .avatar
+      left: 0
+
+    .text
+      margin-left: 45px
+      margin-right: 0.2em
+
   .flags
-    position: absolute
-    text-align: right
-    width: 40px
-    top: 1px
+    display: none
 
   .send-reply
     cursor: pointer
@@ -33,13 +38,13 @@
     font-weight: normal
 
   .meta
-    position: relative
-    left: 41px
-    margin-right: 41px
     border: 1px solid #000
     background: $message-meta-color
     padding: 0.2rem
     font-size: 0
+
+    b
+      display: none
 
     div
       display: inline-block
@@ -56,3 +61,29 @@
   &.new-message
     .meta
       background-color: $message-meta-highlight-color
+
+  +breakpoint($mobile-breakpoint)
+    .avatar
+      left: 0
+
+    .text
+      margin-left: 42px
+      margin-right: 0.2em
+
+    &.reply
+      margin-left: 45px
+
+    .meta
+      position: relative
+      left: 41px
+      margin-right: 41px
+
+      b
+        display: inline
+
+    .flags
+      display: block
+      position: absolute
+      text-align: right
+      width: 40px
+      top: 1px

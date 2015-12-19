@@ -266,7 +266,7 @@ def user_new(request):
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.info(request, "Uživatelský účet vytvořen, vyčkejte prosím na jeho aktivaci administrátorem.")
+            messages.info(request, "Uživatelský účet vytvořen, nyní se můžete přihlásit.")
             return redirect("home")
 
     return render(request, "phorum/user_new.html", {

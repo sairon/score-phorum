@@ -4,5 +4,6 @@ bleach==1.4.2
 django-autoslug==1.8.0
 django-bleach==0.3.0
 django-floppyforms==1.6.0
+django-recaptcha==1.0.4
 django-user-sessions==1.2.0
 psycopg2==2.6.1

@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'user_sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'captcha',
     'django_bleach',
     'floppyforms',
     'phorum',
@@ -172,6 +173,11 @@ BLEACH_ALLOWED_STYLES = [
 
 BLEACH_STRIP_TAGS = False
 BLEACH_STRIP_COMMENTS = True
+
+RECAPTCHA_PUBLIC_KEY = "6LfmexMTAAAAAEArc6dCfDk8N5VCcX_8s3k2LXMy"
+RECAPTCHA_PRIVATE_KEY = get_local_setting("RECAPTCHA_PRIVATE_KEY", "")
+NOCAPTCHA = True
+RECAPTCHA_USE_SSL = True
 
 
 ACTIVE_USERS_TIMEOUT = 20  # minutes

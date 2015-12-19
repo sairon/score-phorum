@@ -1,6 +1,7 @@
 # coding=utf-8
 import os
 from autoslug.settings import slugify
+from captcha.fields import ReCaptchaField
 from django.contrib.auth.forms import (
     AuthenticationForm,
     UserChangeForm as DefaultUserChangeForm,
@@ -199,9 +200,11 @@ class UserChangeForm(forms.ModelForm):
 
 
 class UserCreationForm(DefaultUserCreationForm):
+    captcha = ReCaptchaField()
+
     class Meta(DefaultUserCreationForm.Meta):
         model = User
-        fields = ('username', 'email', 'motto')
+        fields = ('username', 'email', 'motto', 'password1', 'password2', 'captcha')
 
     def clean_username(self):
         username = self.cleaned_data.get('username')

@@ -232,17 +232,6 @@ class Message(models.Model):
 class PublicMessage(Message):
     room = models.ForeignKey(Room)
 
-    def can_be_deleted_by(self, user):
-        can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)
-        if can_be_deleted is not None:
-            return can_be_deleted
-        elif self.author.level < User.LEVEL_GOD <= user.level:
-            # user has at least god level, author's level is lower than god
-            return True
-        elif user in (self.room.author, self.room.moderator):
-            return True
-        return False
-
     def delete(self, using=None):
         authors_post_counts = defaultdict(int)
         if self.children:
@@ -254,6 +243,17 @@ class PublicMessage(Message):
             # and decrease kredyti
             for author, post_count in authors_post_counts.iteritems():
                 author.decrease_kredyti(post_count)
+
+    def can_be_deleted_by(self, user):
+        can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)
+        if can_be_deleted is not None:
+            return can_be_deleted
+        elif self.author.level < User.LEVEL_GOD <= user.level:
+            # user has at least god level, author's level is lower than god
+            return True
+        elif user in (self.room.author, self.room.moderator):
+            return True
+        return False
 
 
 class PrivateMessage(Message):

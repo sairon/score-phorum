@@ -141,14 +141,18 @@ def inbox(request):
     paginator = Paginator(threads, request.user.max_thread_roots)
     threads = paginator.page(page_number)
 
-    last_visit_time = request.user.inbox_visit_time
-    request.user.update_inbox_visit_time()
-
-    return render(request, "phorum/inbox.html", {
+    # RequestContext gets instantiated here
+    response = render(request, "phorum/inbox.html", {
         'threads': threads,
-        'last_visit_time': last_visit_time,
+        'last_visit_time': request.user.inbox_visit_time,
         'message_form': PrivateMessageForm(request.POST or None, author=request.user),
     })
+
+    # update inbox visit time after getting count of new inbox messages
+    # in inbox_messages context processor
+    request.user.update_inbox_visit_time()
+
+    return response
 
 
 @require_POST

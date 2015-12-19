@@ -62,7 +62,7 @@ class BaseMessageForm(forms.ModelForm):
         recipient_name = self.cleaned_data.get("recipient") or None
         recipient = None
         try:
-            recipient = User.objects.get(username=recipient_name)
+            recipient = User.objects.get(username__iexact=recipient_name)
         except User.DoesNotExist:
             if recipient_name is not None:
                 raise forms.ValidationError(u"Uživatel s přezdívkou '%s' neexistuje." % recipient_name)
@@ -78,7 +78,7 @@ class BaseMessageForm(forms.ModelForm):
 
 class PrivateMessageForm(BaseMessageForm):
     error_messages = {
-        'invalid_thread': "Není možné zaslat zprávu do požadovaného vlákna."
+        'invalid_thread': u"Není možné zaslat zprávu do požadovaného vlákna."
     }
 
     def __init__(self, *args, **kwargs):

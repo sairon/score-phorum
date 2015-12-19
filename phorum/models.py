@@ -258,3 +258,11 @@ class PublicMessage(Message):
 
 class PrivateMessage(Message):
     private = True
+
+    def can_be_deleted_by(self, user):
+        can_be_deleted = super(PrivateMessage, self).can_be_deleted_by(user)
+        if can_be_deleted is not None:
+            return can_be_deleted
+        elif user == self.recipient:
+            return True
+        return False

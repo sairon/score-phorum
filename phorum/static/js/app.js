@@ -21,4 +21,9 @@
     $("#id_thread").val("");
     $("#id_recipient").removeClass("reply");
   });
+
+  $('.delete-link a, .delete-link-mobile').click(function(e) {
+    e.preventDefault();
+    return window.confirm('Opravdu chcete smazat příspěvek?');
+  });
 })(document, window, jQuery);

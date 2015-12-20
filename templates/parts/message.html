@@ -25,9 +25,12 @@
       </div>
     </div>
   </div>
-  <div class="avatar send-reply">
-    <img src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
+  <div class="avatar">
+    <img class="send-reply" src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
+    {% if not message.thread %}
+        <div class="jump-to-new"></div>
+    {% endif %}
   </div>
   <div class="text">{{ message.text|safe }}</div>
 </div>

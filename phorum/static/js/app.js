@@ -26,4 +26,14 @@
     e.preventDefault();
     return window.confirm('Opravdu chcete smazat příspěvek?');
   });
+
+  $('.jump-to-new').click(function (e) {
+    var message = $(this).closest('.message');
+    var next = message.nextAll('.new-message, .message:not(.reply)').first();
+    if (next.length) {
+      $('html, body').animate({
+        scrollTop: next.offset().top
+      }, 300);
+    }
+  });
 })(document, window, jQuery);

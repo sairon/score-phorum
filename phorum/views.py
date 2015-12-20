@@ -249,7 +249,6 @@ def login(request):
                 messages.info(request, "Uživatelský účet není aktivní.")
             else:
                 messages.error(request, "Neplatný login nebo heslo.")
-                return room_list(request)
 
     return redirect("home")
 

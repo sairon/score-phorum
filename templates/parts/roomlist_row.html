@@ -1,4 +1,4 @@
-{% load score_tags static %}
+{% load score_tags staticfiles %}
 
 <tr{% if room|new_posts:visits > 0 %} class="unread"{% endif %}>
   <td>{% if room.protected %}<img src="{% static "img/key.gif" %}">{% endif %}</td>

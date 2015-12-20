@@ -16,6 +16,9 @@
     line-height: normal
 
   &:not(.reply)
+    .meta
+      background-color: darken($message-meta-color, 20)
+
     .text
       min-height: 70px // min-height so jump-to-new fits
 
@@ -83,6 +86,10 @@
 
     &.reply
       margin-left: 45px
+
+    &:not(.reply)
+      .meta
+        background-color: $message-meta-color
 
     .meta
       position: relative

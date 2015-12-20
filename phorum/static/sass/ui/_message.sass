@@ -7,23 +7,13 @@
   .avatar
     position: absolute
     width: 40px
-    right: 0
+    left: 0
 
   .text
-    margin: 0.2em 42px 0.5em 0.2em
+    margin: 0.2em 0.2em 0.5em 42px
     min-height: 50px
     word-wrap: break-word
     line-height: normal
-
-  &.reply
-    margin-bottom: 0
-
-    .avatar
-      left: 0
-
-    .text
-      margin-left: 45px
-      margin-right: 0.2em
 
   .flags
     display: none
@@ -65,10 +55,6 @@
   +breakpoint($mobile-breakpoint)
     .avatar
       left: 0
-
-    .text
-      margin-left: 42px
-      margin-right: 0.2em
 
     &.reply
       margin-left: 45px

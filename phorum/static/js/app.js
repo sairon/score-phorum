@@ -23,7 +23,6 @@
   });
 
   $('.delete-link a, .delete-link-mobile').click(function(e) {
-    e.preventDefault();
     return window.confirm('Opravdu chcete smazat příspěvek?');
   });
 

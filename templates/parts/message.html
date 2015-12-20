@@ -19,7 +19,10 @@
         {% endif %}
       </div>
       <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
-      <div class="time" title="{{ message.created }}">{{ message.created|date:"d.m. H:i" }}</div>
+      <div class="time" title="{{ message.created }}">
+        {{ message.created|date:"d.m. H:i" }}
+          <a href="{% url "message_delete" message_id=message.id %}{% if message.private %}?inbox=1{% endif %}" class="delete-link-mobile">&times;</a>
+      </div>
     </div>
   </div>
   <div class="avatar send-reply">

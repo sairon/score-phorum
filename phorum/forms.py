@@ -46,13 +46,14 @@ class AvatarImageField(forms.ImageField):
 
 
 class BaseMessageForm(forms.ModelForm):
-    recipient = forms.CharField(required=False)
+    recipient = forms.CharField(required=False,
+                                widget=forms.TextInput(attrs={'placeholder': "adresát"}))
 
     class Meta:
         fields = ('recipient', 'text', 'thread')
         widgets = {
             'thread': forms.HiddenInput,
-            'recipient': forms.TextInput,
+            'text': forms.Textarea(attrs={'placeholder': "text"}),
         }
 
     def __init__(self, *args, **kwargs):

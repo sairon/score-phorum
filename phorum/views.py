@@ -49,6 +49,10 @@ def room_view(request, room_slug):
     paginator = Paginator(threads, max_threads)
     threads = paginator.page(page_number)
 
+    for thread in threads:
+        thread.child_messages = list(thread.children.all())
+        thread.last_child = thread.child_messages[-1] if len(thread.child_messages) else None
+
     last_visit_time = None
     new_posts = None
     if request.user.is_authenticated():
@@ -140,6 +144,10 @@ def inbox(request):
 
     paginator = Paginator(threads, request.user.max_thread_roots)
     threads = paginator.page(page_number)
+
+    for thread in threads:
+        thread.child_messages = list(thread.children.all())
+        thread.last_child = thread.child_messages[-1] if len(thread.child_messages) else None
 
     # RequestContext gets instantiated here
     response = render(request, "phorum/inbox.html", {

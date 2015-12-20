@@ -29,14 +29,14 @@
     <img class="send-reply" src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
     <div class="level-{{ message.author.level }}"></div>
     {% if not message.thread %}
-        <div class="jump-to-new"></div>
+        <div class="jump-to-new{% if message.children and request.user.is_authenticated and message.last_child|is_newer_than:last_visit_time %} in-thread{% endif %}"></div>
     {% endif %}
   </div>
   <div class="text">{{ message.text|safe }}</div>
 </div>
 
 {% if not message.thread %}
-  {% for child_message in message.children.all %}
+  {% for child_message in message.child_messages %}
     {% include "parts/message.html" with message=child_message %}
   {% endfor %}
 {% endif %}

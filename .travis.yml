@@ -31,7 +31,6 @@ before_script:
   - cp score/settings/local_settings.json.travis score/settings/local_settings.json
 
 script:
-  - python manage.py makemigrations phorum  # TODO: should be removed after adding migrations to git
   - python manage.py test
   - bash travis/compile.sh
 

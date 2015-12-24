@@ -24,8 +24,7 @@ rsync -avR . deployment/ \
     --exclude /vagrant \
     --exclude /Vagrantfile \
     --exclude /phorum/static/.sass-cache \
-    --exclude /phorum/static/sass \
-    --exclude /phorum/migrations
+    --exclude /phorum/static/sass
 
 # create .gitignore for deployment
 cat > deployment/.gitignore <<GITIGNORE

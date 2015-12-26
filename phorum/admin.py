@@ -18,7 +18,7 @@ class AdminRoomChangeForm(forms.ModelForm):
         fields = '__all__'
 
     def clean_password(self):
-        return self.initial["password"]
+        return self.initial.get("password", "")
 
 
 class RoomAdmin(admin.ModelAdmin):

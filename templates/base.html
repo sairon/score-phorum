@@ -33,6 +33,7 @@
           <li><a href="{{ request.get_full_path }}">refresh</a></li>
           <li><a href="{% url "logout" %}">odhlásit</a></li>
         {% else %}
+          <li><a href="{% url "user_new" %}">nový uživatel</a></li>
           <li><a href="{{ request.get_full_path }}">refresh</a></li>
         {% endif %}
       </ul>

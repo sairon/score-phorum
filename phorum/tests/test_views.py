@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 from user_sessions.utils.tests import Client
 
 from .utils import new_public_thread, public_reply
-from ..models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
+from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserRoomKeyring
 
 
 class TestDataMixin(object):
@@ -382,6 +382,26 @@ class RoomViewTest(TestDataMixin, TestCase):
         self.assertEqual(Room.objects.filter(name="new room").count(), 1)
         response = self.client.get(reverse("room_view", kwargs={'room_slug': room_slug}))
         self.assertRedirects(response, reverse("room_password_prompt", kwargs={'room_slug': room_slug}))
+
+    def test_mark_unread(self):
+        assert self.client.login(username="testclient1", password="password")
+        room = self.rooms['unpinned1']
+        self.client.get(reverse("room_view", kwargs={'room_slug': room.slug}))
+        self.assertEqual(RoomVisit.objects.filter(room=room, user=self.user1).count(), 1)
+        response = self.client.get(reverse("room_mark_unread", kwargs={'room_slug': room.slug}))
+        self.assertRedirects(response, reverse("home"), fetch_redirect_response=False)
+        response = self.client.get(reverse("home"))
+        self.assertEqual(RoomVisit.objects.filter(room=room, user=self.user1).count(), 0)
+        self.assertContains(response,  "byla označena jako nepřečtená")
+
+    def test_mark_unread_nonvisited(self):
+        assert self.client.login(username="testclient1", password="password")
+        room = self.rooms['unpinned1']
+        response = self.client.get(reverse("room_mark_unread", kwargs={'room_slug': room.slug}),)
+        self.assertRedirects(response, reverse("home"), fetch_redirect_response=False)
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, "byla označena jako nepřečtená")
+        self.assertEqual(RoomVisit.objects.filter(room=room, user=self.user1).count(), 0)
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])

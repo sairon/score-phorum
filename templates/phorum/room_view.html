@@ -17,6 +17,12 @@
   {% include "parts/discussion_threads.html" %}
 
   {% include "parts/room_meta.html" %}
+
+  {% if request.user.is_authenticated %}
+    <div class="room-mark-unread">
+      <a href="{% url "room_mark_unread" room_slug=room.slug %}">Označit místnost jako nepřečtenou</a>
+    </div>
+  {% endif %}
 {% endblock %}
 
 {% block extra_body %}

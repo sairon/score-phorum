@@ -133,6 +133,22 @@ def room_edit(request, room_slug):
 
 
 @login_required
+def room_mark_unread(request, room_slug):
+    room = get_object_or_404(Room, slug=room_slug)
+
+    if room.protected:
+        if not user_can_view_protected_room(request.user, room):
+            return redirect("room_password_prompt", room_slug=room_slug)
+
+    to_delete = RoomVisit.objects.filter(user=request.user, room=room)
+    if to_delete.count():
+        to_delete.delete()
+        messages.info(request, u"Místnost \"{}\" byla označena jako nepřečtená.".format(room.name))
+
+    return redirect("home")
+
+
+@login_required
 def inbox(request):
     page_number = request.GET.get("page", 1)
 

@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^room/new$', 'phorum.views.room_new', name="room_new"),
     url(r'^room/(?P<room_slug>.+)/$', 'phorum.views.room_view', name="room_view"),
     url(r'^room/(?P<room_slug>.+)/password$', 'phorum.views.room_password_prompt', name="room_password_prompt"),
+    url(r'^room/(?P<room_slug>.+)/mark-unread$', 'phorum.views.room_mark_unread', name="room_mark_unread"),
     url(r'^room/(?P<room_slug>.+)/edit$', 'phorum.views.room_edit', name="room_edit"),
     url(r'^room/(?P<room_slug>.+)/new-message$', 'phorum.views.message_send', name="message_send"),
     url(r'^login$', 'phorum.views.login', name="login"),

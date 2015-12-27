@@ -77,6 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = _('user')
         verbose_name_plural = _('users')
+        ordering = ['username']
 
     def get_short_name(self):
         return self.username

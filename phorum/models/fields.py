@@ -17,6 +17,7 @@ class MessageTextField(BleachField):
 
     def pre_save(self, model_instance, add):
         message = getattr(model_instance, self.attname).strip()
-        message = linebreaksbr(message)
-        message = linkify(message)
-        return mark_safe(clean(message, **self.bleach_kwargs))
+        message = linebreaksbr(mark_safe(message))
+        if "<a" not in message:
+            message = linkify(message)
+        return clean(message, **self.bleach_kwargs)

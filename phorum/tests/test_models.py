@@ -50,6 +50,12 @@ class TestModels(TestDataMixin, TestCase):
                 'expected': "<a href=\"https://dots.com\">https://dots.com</a>. "
                             "and (<a href=\"http://brackets.com\">http://brackets.com</a>)",
             },
+            {
+                'entered': "<a href=\"https://dots.com\">https://dots.com</a>. "
+                           "and (<a href=\"http://brackets.com\">http://brackets.com</a>)",
+                'expected': "<a href=\"https://dots.com\">https://dots.com</a>. "
+                            "and (<a href=\"http://brackets.com\">http://brackets.com</a>)",
+            },
         ]
         for test in tests:
             message = PublicMessage.objects.create(room=self.room, author=self.user1, text=test['entered'])

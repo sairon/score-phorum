@@ -1,5 +1,7 @@
+from bleach import clean, linkify
 from django.db import models
 from django.template.defaultfilters import linebreaksbr
+from django.utils.safestring import mark_safe
 from django_bleach.models import BleachField
 
 
@@ -14,4 +16,7 @@ class MessageTextField(BleachField):
     """Bleach field extended with nl2br transformation before saving."""
 
     def pre_save(self, model_instance, add):
-        return linebreaksbr(super(MessageTextField, self).pre_save(model_instance, add).strip())
+        message = getattr(model_instance, self.attname).strip()
+        message = linebreaksbr(message)
+        message = linkify(message)
+        return mark_safe(clean(message, **self.bleach_kwargs))

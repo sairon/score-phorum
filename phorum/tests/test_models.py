@@ -19,13 +19,13 @@ class TestDataMixin(object):
 class TestModels(TestDataMixin, TestCase):
     def test_message_breaking(self):
         entered_text = "hello\nworld"
-        expected_text = "hello<br />world"
+        expected_text = "hello<br>world"
         message = PublicMessage.objects.create(room=self.room, author=self.user1, text=entered_text)
         self.assertEqual(PublicMessage.objects.get(id=message.id).text, expected_text)
 
     def test_message_multibreak(self):
         entered_text = "hello\n\n\nworld"
-        expected_text = "hello<br /><br /><br />world"
+        expected_text = "hello<br><br><br>world"
         message = PublicMessage.objects.create(room=self.room, author=self.user1, text=entered_text)
         self.assertEqual(PublicMessage.objects.get(id=message.id).text, expected_text)
 
@@ -34,3 +34,23 @@ class TestModels(TestDataMixin, TestCase):
         expected_text = "hello"
         message = PublicMessage.objects.create(room=self.room, author=self.user1, text=entered_text)
         self.assertEqual(PublicMessage.objects.get(id=message.id).text, expected_text)
+
+    def test_linkify(self):
+        tests = [
+            {
+                'entered': "yo, a link to http://example.com, fellaz",
+                'expected': "yo, a link to <a href=\"http://example.com\">http://example.com</a>, fellaz",
+            },
+            {
+                'entered': "https://www.example.com",
+                'expected': "<a href=\"https://www.example.com\">https://www.example.com</a>",
+            },
+            {
+                'entered': "https://dots.com. and (http://brackets.com)",
+                'expected': "<a href=\"https://dots.com\">https://dots.com</a>. "
+                            "and (<a href=\"http://brackets.com\">http://brackets.com</a>)",
+            },
+        ]
+        for test in tests:
+            message = PublicMessage.objects.create(room=self.room, author=self.user1, text=test['entered'])
+            self.assertEqual(PublicMessage.objects.get(id=message.id).text, test['expected'])

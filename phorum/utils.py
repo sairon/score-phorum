@@ -17,11 +17,3 @@ def get_ip_addr(request):
     else:
         ip_addr = request.META.get("REMOTE_ADDR")
     return ip_addr
-
-
-def nl2br(text):
-    """Translate unix newlines to HTML <br> tags.
-
-    Also removes trailing and leading whitespace in the process.
-    """
-    return text.strip().replace("\n", "<br>")

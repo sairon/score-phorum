@@ -19,7 +19,13 @@ class TestDataMixin(object):
 class TestModels(TestDataMixin, TestCase):
     def test_message_breaking(self):
         entered_text = "hello\nworld"
-        expected_text = "hello<br>world"
+        expected_text = "hello<br />world"
+        message = PublicMessage.objects.create(room=self.room, author=self.user1, text=entered_text)
+        self.assertEqual(PublicMessage.objects.get(id=message.id).text, expected_text)
+
+    def test_message_multibreak(self):
+        entered_text = "hello\n\n\nworld"
+        expected_text = "hello<br /><br /><br />world"
         message = PublicMessage.objects.create(room=self.room, author=self.user1, text=entered_text)
         self.assertEqual(PublicMessage.objects.get(id=message.id).text, expected_text)
 

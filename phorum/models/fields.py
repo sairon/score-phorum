@@ -1,7 +1,6 @@
 from django.db import models
+from django.template.defaultfilters import linebreaksbr
 from django_bleach.models import BleachField
-
-from ..utils import nl2br
 
 
 class LastReplyField(models.DateTimeField):
@@ -15,4 +14,4 @@ class MessageTextField(BleachField):
     """Bleach field extended with nl2br transformation before saving."""
 
     def pre_save(self, model_instance, add):
-        return nl2br(super(MessageTextField, self).pre_save(model_instance, add))
+        return linebreaksbr(super(MessageTextField, self).pre_save(model_instance, add).strip())

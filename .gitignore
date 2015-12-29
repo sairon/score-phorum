@@ -5,4 +5,4 @@
 /deployment
 /media/*
 /static/*
-local_settings.json
+/score/settings/local_settings.json

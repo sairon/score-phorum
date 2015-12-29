@@ -28,7 +28,7 @@ install:
 
 before_script:
   - psql -c 'create database score' -U postgres
-  - cp score/settings/local_settings.json.travis score/settings/local_settings.json
+  - cp travis/local_settings.json score/settings/local_settings.json
 
 script:
   - python manage.py test

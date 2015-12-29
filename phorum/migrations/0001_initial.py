@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 import autoslug.fields
-import phorum.managers
+import phorum.models.managers
 from django.conf import settings
 import django.utils.timezone
 import phorum.models
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'users',
             },
             managers=[
-                ('objects', phorum.managers.UserManager()),
+                ('objects', phorum.models.managers.UserManager()),
             ],
         ),
         migrations.CreateModel(

@@ -12,10 +12,10 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django_bleach.models import BleachField
 
+from .fields import MessageTextField, LastReplyField
 from .managers import UserManager, RoomVisitManager
-from .utils import nl2br
+from .querysets import RoomQueryset
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -127,14 +127,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save(update_fields=['kredyti'])
 
 
-class RoomQueryset(models.QuerySet):
-    def pinned(self):
-        return self.filter(pinned=True)
-
-    def not_pinned(self):
-        return self.filter(pinned=False)
-
-
 class Room(models.Model):
     objects = RoomQueryset.as_manager()
 
@@ -182,20 +174,6 @@ class UserRoomKeyring(models.Model):
     room = models.ForeignKey(Room)
     user = models.ForeignKey(User)
     last_successful_entry = models.DateTimeField(auto_now=True)
-
-
-class LastReplyField(models.DateTimeField):
-    def pre_save(self, model_instance, add):
-        if not model_instance.pk and not model_instance.thread:
-            return model_instance.created
-        return super(LastReplyField, self).pre_save(model_instance, add)
-
-
-class MessageTextField(BleachField):
-    """Bleach field extended with nl2br transformation before saving."""
-
-    def pre_save(self, model_instance, add):
-        return nl2br(super(MessageTextField, self).pre_save(model_instance, add))
 
 
 class Message(models.Model):

@@ -240,8 +240,7 @@ class PublicMessage(Message):
         can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)
         if can_be_deleted is not None:
             return can_be_deleted
-        elif self.author.level < User.LEVEL_GOD <= user.level:
-            # user has at least god level, author's level is lower than god
+        elif user.level == User.LEVEL_GOD and self.author.level < User.LEVEL_1_DOT:
             return True
         elif user in (self.room.author, self.room.moderator):
             return True

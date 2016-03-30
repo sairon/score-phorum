@@ -16,18 +16,34 @@ from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserR
 class TestDataMixin(object):
     @classmethod
     def setUpTestData(cls):
+        # Green ribbon
         cls.user1 = User.objects.create(
             username='testclient1', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
-            email='testclient1@example.com', is_staff=False, is_active=True
+            email='testclient1@example.com', is_staff=False, is_active=True,
+            kredyti=0
         )
+        assert cls.user1.level == User.LEVEL_GREEN
+        # Maroon ribbon
         cls.user2 = User.objects.create(
             username='testclient2', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
-            email='testclient2@example.com', is_staff=False, is_active=True
+            email='testclient2@example.com', is_staff=False, is_active=True,
+            kredyti=3100
         )
+        assert cls.user2.level == User.LEVEL_MAROON
+        # One dot
         cls.user3 = User.objects.create(
             username='testclient3', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
-            email='testclient3@example.com', is_staff=False, is_active=True
+            email='testclient3@example.com', is_staff=False, is_active=True,
+            kredyti=6100
         )
+        assert cls.user3.level == User.LEVEL_1_DOT
+        # God
+        cls.user4 = User.objects.create(
+            username='testclient4', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            email='testclient3@example.com', is_staff=False, is_active=True,
+            kredyti=36000
+        )
+        assert cls.user4.level == User.LEVEL_GOD
         cls.user_inactive = User.objects.create(
             username='inactive', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
             email='inactive@example.com', is_staff=False, is_active=False
@@ -261,6 +277,28 @@ class RoomViewTest(TestDataMixin, TestCase):
     def test_can_not_delete_others_messages(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user2)
         assert self.client.login(username="testclient1", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+        self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
+        self.assertEqual(PublicMessage.objects.count(), 1)
+
+    def test_god_can_delete_maroon(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user2)
+        assert self.client.login(username="testclient4", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+        self.assertContains(response, "Zpráva byla smazána")
+        self.assertEqual(PublicMessage.objects.count(), 0)
+
+    def test_god_can_not_delete_dot(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user3)
+        assert self.client.login(username="testclient4", password="password")
         room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
         response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))
         self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),

@@ -27,7 +27,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     LEVEL_YELLOW = 1
     LEVEL_ORANGE = 2
     LEVEL_RED = 3
-    LEVEL_CRIMSON = 4
+    LEVEL_MAROON = 4
     LEVEL_1_DOT = 5
     LEVEL_2_DOTS = 6
     LEVEL_3_DOTS = 7
@@ -41,7 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         (LEVEL_YELLOW, "Yellow ribbon"),
         (LEVEL_ORANGE, "Orange ribbon"),
         (LEVEL_RED, "Red ribbon"),
-        (LEVEL_CRIMSON, "Crimson ribbon"),
+        (LEVEL_MAROON, "Maroon ribbon"),
         (LEVEL_1_DOT, "1 dot"),
         (LEVEL_2_DOTS, "2 dots"),
         (LEVEL_3_DOTS, "3 dots"),
@@ -105,7 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         elif self.kredyti > 6000:
             return User.LEVEL_1_DOT
         elif self.kredyti > 3000:
-            return User.LEVEL_CRIMSON
+            return User.LEVEL_MAROON
         elif self.kredyti > 1100:
             return User.LEVEL_RED
         elif self.kredyti > 400:

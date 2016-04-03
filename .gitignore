@@ -4,5 +4,6 @@
 /.vagrant
 /deployment
 /media/*
+/protected/*
 /static/*
 /score/settings/local_settings.json

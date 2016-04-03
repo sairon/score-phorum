@@ -1,0 +1,17 @@
+ul.submenu
+  text-align: center
+  margin-bottom: 1em
+  font-weight: bold
+
+  li
+    line-height: 1.5em
+
+    +breakpoint($mobile-breakpoint)
+      line-height: 1em
+      display: inline
+      &:first-child
+        &::before
+          content: "| "
+
+      &::after
+        content: " | "

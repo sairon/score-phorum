@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{% endblock %}Score Phorum v4.0</title>
   <link rel="stylesheet" href="{% static "css/screen.css" %}">
+  {% if request.user.usercustomization.custom_css %}
+    <link rel="stylesheet" href="{% url "custom_resource" res_type="css" user_id=request.user.id %}">
+  {% endif %}
   {# Following block was generated using https://realfavicongenerator.net/ #}
   <link rel="apple-touch-icon" sizes="57x57" href="{% static "favicons/apple-touch-icon-57x57.png" %}">
   <link rel="apple-touch-icon" sizes="60x60" href="{% static "favicons/apple-touch-icon-60x60.png" %}">
@@ -68,5 +71,8 @@
 
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   {% block extra_body %}{% endblock %}
+  {% if request.user.usercustomization.custom_js %}
+    <script src="{% url "custom_resource" res_type="js" user_id=request.user.id %}"></script>
+  {% endif %}
 </body>
 </html>

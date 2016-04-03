@@ -326,9 +326,10 @@ def user_customization(request):
     form = UserCustomizationForm(request.POST or None, instance=instance, user=request.user)
     if request.method == "POST":
         if form.is_valid():
+            messages.success(request, "Změny v úpravách vzhledu byly uloženy.")
             form.save()
             return redirect("user_customization")
-        messages.error(request, "invalid")
+        messages.error(request, "Změny v úpravách vzhledu obsahují neplatné údaje.")
     return render(request, 'phorum/user_customization.html', {
         'form': form,
     })

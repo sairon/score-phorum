@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block top_menu %}
+  {{ block.super }}
   {% include "parts/userprofile_menu.html" %}
+{% endblock %}
 
+{% block content %}
   <form action="{% url "user_customization" %}" method="post" enctype="multipart/form-data">
     <table>
       {{ form }}

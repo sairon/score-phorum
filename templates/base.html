@@ -29,35 +29,37 @@
 </head>
 <body>
   <div id="content">
-    <div class="top-menu">
-      {% if login_form and request.user.is_anonymous%}
-        <form action="{% url "login" %}" method="post">
-          {% csrf_token %}
-          {{ login_form }}
-          <input type="hidden" name="next" value="{{ next }}">
-          <input type="submit" value="Login">
-        </form>
-      {% endif %}
-
-      <ul>
-        {% if request.user.is_authenticated %}
-          <li><a href="{% url "user_edit" %}">{{ request.user.username }}</a></li>
-          <li><a href="{% url "inbox" %}">moje zprávy</a> (<span class="inbox-new-messages">{{ inbox_unread_count }}</span>)</li>
-          {% if request.path != "/" %}
-            <li><a href="{% url "home" %}">místnosti</a></li>
-          {% endif %}
-          {% if new_posts >= 0 %}
-            <li>nové příspěvky: {{ new_posts }}</li>
-          {% endif %}
-          <li><a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})</li>
-          <li><a href="{{ request.get_full_path }}">refresh</a></li>
-          <li><a href="{% url "logout" %}">odhlásit</a></li>
-        {% else %}
-          <li><a href="{% url "user_new" %}">nový uživatel</a></li>
-          <li><a href="{{ request.get_full_path }}">refresh</a></li>
+    {% block top_menu %}
+      <div class="top-menu">
+        {% if login_form and request.user.is_anonymous%}
+          <form action="{% url "login" %}" method="post">
+            {% csrf_token %}
+            {{ login_form }}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input type="submit" value="Login">
+          </form>
         {% endif %}
-      </ul>
-    </div>
+
+        <ul>
+          {% if request.user.is_authenticated %}
+            <li><a href="{% url "user_edit" %}">{{ request.user.username }}</a></li>
+            <li><a href="{% url "inbox" %}">moje zprávy</a> (<span class="inbox-new-messages">{{ inbox_unread_count }}</span>)</li>
+            {% if request.path != "/" %}
+              <li><a href="{% url "home" %}">místnosti</a></li>
+            {% endif %}
+            {% if new_posts >= 0 %}
+              <li>nové příspěvky: {{ new_posts }}</li>
+            {% endif %}
+            <li><a href="{% url "users" %}">uživatelé</a> ({{ active_users_count }})</li>
+            <li><a href="{{ request.get_full_path }}">refresh</a></li>
+            <li><a href="{% url "logout" %}">odhlásit</a></li>
+          {% else %}
+            <li><a href="{% url "user_new" %}">nový uživatel</a></li>
+            <li><a href="{{ request.get_full_path }}">refresh</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endblock %}
 
     {% include "snippets/messages.html" with messages=messages only %}
 

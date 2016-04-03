@@ -17,3 +17,8 @@ def get_ip_addr(request):
     else:
         ip_addr = request.META.get("REMOTE_ADDR")
     return ip_addr
+
+
+def get_custom_resource_filename(user_id, resource_type):
+    return "custom_%(res_type)s_id%(user_id)s.%(res_type)s" \
+           % dict(res_type=resource_type, user_id=user_id)

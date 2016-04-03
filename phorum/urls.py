@@ -16,6 +16,8 @@ urlpatterns = patterns(
     url(r'^logout$', 'logout', name="logout"),
     url(r'^user/new', 'user_new', name="user_new"),
     url(r'^user/edit', 'user_edit', name="user_edit"),
+    url(r'^user/customization', 'user_customization', name="user_customization"),
     url(r'^users/', 'users', name="users"),
     url(r'^message/(?P<message_id>\d+)/delete', 'message_delete', name="message_delete"),
+    url(r'^user/(?P<user_id>\d+)/custom\.(?P<res_type>css|js$)', 'custom_resource', name="custom_resource"),
 )

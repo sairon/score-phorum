@@ -8,12 +8,15 @@ from django.contrib.auth.forms import (
     UserCreationForm as DefaultUserCreationForm
 )
 from django.contrib.auth.hashers import check_password
+from django.core.files.base import ContentFile
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
+from django.utils.encoding import force_text
+from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
 import floppyforms.__future__ as forms
 
-from .models import PrivateMessage, PublicMessage, Room, User, UserRoomKeyring
+from .models import PrivateMessage, PublicMessage, Room, User, UserCustomization, UserRoomKeyring
 
 
 class AvatarImageField(forms.ImageField):
@@ -279,3 +282,20 @@ class RoomPasswordPrompt(forms.Form):
             keyring_record.save()
 
         return password
+
+
+class UserCustomizationForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super(UserCustomizationForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        instance = super(UserCustomizationForm, self).save(False)
+        instance.user = self.user
+        if commit:
+            instance.save()
+        return instance
+
+    class Meta:
+        model = UserCustomization
+        fields = ('custom_css', 'custom_js')

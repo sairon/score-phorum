@@ -11,19 +11,21 @@ from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.http import is_safe_url
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_POST
+import sendfile
 from user_sessions.models import Session
 
 from .forms import (
     LoginForm, PrivateMessageForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
-    RoomPasswordPrompt, UserCreationForm, UserChangeForm
+    RoomPasswordPrompt, UserCreationForm, UserChangeForm, UserCustomizationForm
 )
-from .models import PrivateMessage, PublicMessage, Room, RoomVisit
+from .models import PrivateMessage, PublicMessage, Room, RoomVisit, UserCustomization
 from .utils import user_can_view_protected_room, get_ip_addr
 
 
@@ -315,6 +317,24 @@ def user_edit(request):
 
 
 @login_required
+def user_customization(request):
+    try:
+        instance = UserCustomization.objects.get(user_id=request.user.id)
+    except UserCustomization.DoesNotExist:
+        instance = None
+
+    form = UserCustomizationForm(request.POST or None, instance=instance, user=request.user)
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            return redirect("user_customization")
+        messages.error(request, "invalid")
+    return render(request, 'phorum/user_customization.html', {
+        'form': form,
+    })
+
+
+@login_required
 def users(request):
     active_threshold = now() - timedelta(minutes=settings.ACTIVE_USERS_TIMEOUT)
 
@@ -327,3 +347,15 @@ def users(request):
     return render(request, "phorum/users.html", {
         'sessions': sessions
     })
+
+
+@login_required
+def custom_resource(request, user_id, res_type):
+    customization = get_object_or_404(UserCustomization, user_id=user_id)
+    if res_type == "css":
+        if customization.custom_css:
+            return sendfile.sendfile(request, customization.custom_css.path)
+    elif res_type == "js":
+        if customization.custom_js:
+            return sendfile.sendfile(request, customization.custom_js.path)
+    return HttpResponseNotFound("Requested resource does not exist.")

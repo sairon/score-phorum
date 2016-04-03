@@ -3,19 +3,13 @@
 {% block content %}
   {% include "parts/userprofile_menu.html" %}
 
-  <form action="{% url "user_edit" %}" method="post" enctype="multipart/form-data">
+  <form action="{% url "user_customization" %}" method="post" enctype="multipart/form-data">
     <table>
-      <tr>
-        <th>Kredyti:</th>
-        <td>
-          {{ user.kredyti }}
-        </td>
-      </tr>
       {{ form }}
       <tr>
         <th></th>
         <td>
-          <input type="submit" value="Upravit">
+          <input type="submit" value="Uložit">
           {% csrf_token %}
         </td>
       </tr>

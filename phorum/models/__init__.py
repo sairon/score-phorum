@@ -1,10 +1,13 @@
 # coding=utf-8
+import os
 from collections import defaultdict
 
 from autoslug.fields import AutoSlugField
+from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import AbstractBaseUser
+from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
@@ -13,9 +16,10 @@ from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .fields import MessageTextField, LastReplyField
+from .fields import MessageTextField, LastReplyField, RawContentFileField
 from .managers import UserManager, RoomVisitManager
 from .querysets import RoomQueryset
+from .utils import css_upload_path, js_upload_path
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -257,3 +261,30 @@ class PrivateMessage(Message):
         elif user == self.recipient:
             return True
         return False
+
+
+class OverwritingFileSystemStorage(FileSystemStorage):
+    """
+    FileSystemStorage that overwrites the file when a file with given
+    filename already exists. Operation is not atomic - old file is removed
+    first and then a new one is saved.
+    """
+    def get_available_name(self, name, max_length=None):
+        self.delete(name)
+        return name
+
+
+customization_storage = OverwritingFileSystemStorage(
+    location=os.path.join(settings.SENDFILE_ROOT),
+    base_url=settings.SENDFILE_URL
+)
+
+
+class UserCustomization(models.Model):
+    user = models.OneToOneField(User)
+    custom_css = RawContentFileField(null=True, blank=True,
+                                     upload_to=css_upload_path, storage=customization_storage,
+                                     verbose_name="Vlastní CSS")
+    custom_js = RawContentFileField(null=True, blank=True,
+                                    upload_to=js_upload_path, storage=customization_storage,
+                                    verbose_name="Vlastní JS")

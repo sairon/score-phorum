@@ -1,16 +1,23 @@
 # coding=utf-8
 import os
+import random
+import string
 from datetime import datetime
 
+import mock
 from autoslug.utils import slugify
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse
 from django.test import TestCase, override_settings
 from user_sessions.utils.tests import Client
 
+from phorum.models.utils import make_resource_upload_path, css_upload_path, js_upload_path
+from phorum.utils import get_custom_resource_filename
 from .utils import new_public_thread, public_reply
-from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserRoomKeyring
+from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserRoomKeyring, customization_storage, \
+    UserCustomization
 
 
 class TestDataMixin(object):
@@ -674,3 +681,71 @@ class UserManagementTest(TestDataMixin, TestCase):
         self.assertRedirects(response, reverse("user_edit"), fetch_redirect_response=False)
         response = self.client.get(reverse("user_edit"))
         self.assertContains(response, "Profil uživatele upraven")
+
+    def test_user_customization_create(self):
+        assert self.client.login(username="testclient1", password="password")
+        # Generate some random text
+        custom_css = ''.join(random.choice(string.ascii_letters) for _ in range(60))
+        custom_js = ''.join(random.choice(string.ascii_letters) for _ in range(60))
+        data = {
+            'custom_css': custom_css,
+            'custom_js': custom_js
+        }
+
+        m = mock.mock_open()
+
+        with mock.patch("os.open"), mock.patch("fcntl.flock"), mock.patch("os.close"), mock.patch("os.fdopen", m):
+            response = self.client.post(reverse("user_customization"), data)
+            handle = m()
+            self.assertEqual(handle.write.call_args_list, [mock.call(custom_css), mock.call(custom_js)])
+            self.assertRedirects(response, reverse("user_customization"), fetch_redirect_response=False)
+
+    def test_user_customization_get(self):
+        assert self.client.login(username="testclient1", password="password")
+        customization_mock = mock.Mock()
+        customization_mock.user = self.user1
+        css_path = css_upload_path(customization_mock, "anything")
+        js_path = js_upload_path(customization_mock, "anything")
+
+        UserCustomization.objects.create(
+            user=self.user1, custom_css=css_path, custom_js=js_path
+        )
+
+        with mock.patch("sendfile.sendfile") as sendfile:
+            sendfile.return_value = HttpResponse()
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "js")))
+            self.assertEqual(response.status_code, 200, response.content)
+            sendfile.assert_called_once_with(response.wsgi_request,
+                                             os.path.join(settings.SENDFILE_ROOT, js_path))
+
+        with mock.patch("sendfile.sendfile") as sendfile:
+            sendfile.return_value = HttpResponse()
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
+            self.assertEqual(response.status_code, 200, response.content)
+            sendfile.assert_called_once_with(response.wsgi_request,
+                                             os.path.join(settings.SENDFILE_ROOT, css_path))
+
+    def test_user_customization_delete(self):
+        assert self.client.login(username="testclient1", password="password")
+        customization_mock = mock.Mock()
+        customization_mock.user = self.user1
+        css_path = css_upload_path(customization_mock, "anything")
+        js_path = js_upload_path(customization_mock, "anything")
+
+        customization = UserCustomization.objects.create(
+            user=self.user1, custom_css=css_path, custom_js=js_path
+        )
+
+        css_full_path = customization.custom_css.path
+        js_full_path = customization.custom_js.path
+
+        data = {
+            'custom_css': "",
+            'custom_js': ""
+        }
+
+        with mock.patch("django.core.files.storage.FileSystemStorage.delete") as delete:
+            self.client.post(reverse("user_customization"), data)
+            self.assertEqual(delete.call_count, 2)
+            self.assertEqual(delete.call_args_list, [mock.call(css_full_path), mock.call(js_full_path)])
+

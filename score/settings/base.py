@@ -180,4 +180,9 @@ NOCAPTCHA = True
 RECAPTCHA_USE_SSL = True
 
 
+SENDFILE_BACKEND = "sendfile.backends.nginx"
+SENDFILE_ROOT = os.path.join(BASE_DIR, "protected")
+SENDFILE_URL = "/protected"
+
+
 ACTIVE_USERS_TIMEOUT = 20  # minutes

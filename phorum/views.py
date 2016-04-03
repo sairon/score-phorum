@@ -352,6 +352,9 @@ def users(request):
 
 @login_required
 def custom_resource(request, user_id, res_type):
+    if request.user.id != int(user_id):
+        return HttpResponseForbidden("You are not allowed to view this resource.")
+
     customization = get_object_or_404(UserCustomization, user_id=user_id)
     if res_type == "css":
         if customization.custom_css:

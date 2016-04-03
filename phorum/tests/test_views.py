@@ -749,3 +749,30 @@ class UserManagementTest(TestDataMixin, TestCase):
             self.assertEqual(delete.call_count, 2)
             self.assertEqual(delete.call_args_list, [mock.call(css_full_path), mock.call(js_full_path)])
 
+    def test_user_customization_acl(self):
+        customization_mock = mock.Mock()
+        customization_mock.user = self.user1
+        css_path = css_upload_path(customization_mock, "anything")
+        js_path = js_upload_path(customization_mock, "anything")
+
+        UserCustomization.objects.create(
+            user=self.user1, custom_css=css_path, custom_js=js_path
+        )
+
+        # First user should be able to get his resources.
+        assert self.client.login(username="testclient1", password="password")
+        with mock.patch("sendfile.sendfile") as sendfile:
+            sendfile.return_value = HttpResponse()
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
+            self.assertEqual(response.status_code, 200)
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "js")))
+            self.assertEqual(response.status_code, 200)
+
+        # Second user should not be able to get first user's resources.
+        assert self.client.login(username="testclient2", password="password")
+        with mock.patch("sendfile.sendfile") as sendfile:
+            sendfile.return_value = HttpResponse()
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
+            self.assertEqual(response.status_code, 403)
+            response = self.client.get(reverse("custom_resource", args=(self.user1.id, "js")))
+            self.assertEqual(response.status_code, 403)

@@ -14,6 +14,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.http import is_safe_url
+from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
 from django.views.decorators.debug import sensitive_post_parameters
@@ -274,7 +275,8 @@ def login(request):
             if user and not user.is_active:
                 messages.info(request, "Uživatelský účet není aktivní.")
             else:
-                messages.error(request, "Neplatný login nebo heslo.")
+                messages.error(request, mark_safe(u'Neplatný login nebo heslo. '
+                                                  u'<a href="%s">Zapomenuté heslo?</a>' % reverse('password_reset')))
 
     return redirect("home")
 

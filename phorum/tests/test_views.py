@@ -51,6 +51,12 @@ class TestDataMixin(object):
             kredyti=36000
         )
         assert cls.user4.level == User.LEVEL_GOD
+        # admin
+        cls.user_admin = User.objects.create(
+            username='the_admin', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            email='the_admin@example.com', is_staff=False, is_active=True,
+            kredyti=1, level_override=User.LEVEL_ADMIN
+        )
         cls.user_inactive = User.objects.create(
             username='inactive', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
             email='inactive@example.com', is_staff=False, is_active=False
@@ -313,6 +319,18 @@ class RoomViewTest(TestDataMixin, TestCase):
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
         self.assertEqual(PublicMessage.objects.count(), 1)
+
+    def test_admin_can_delete_everything(self):
+        for user in (self.user1, self.user2, self.user3, self.user4, self.user_admin):
+            thread = new_public_thread(self.rooms['unpinned1'], user)
+            assert self.client.login(username="the_admin", password="password")
+            room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+            response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))
+            self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                                 fetch_redirect_response=False)
+            response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+            self.assertContains(response, "Zpráva byla smazána")
+            self.assertEqual(PublicMessage.objects.count(), 0)
 
     def test_room_author_can_delete_others_messages(self):
         room = Room.objects.create(

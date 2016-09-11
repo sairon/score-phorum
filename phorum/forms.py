@@ -239,7 +239,7 @@ class RoomCreationForm(forms.ModelForm):
 
     class Meta:
         model = Room
-        fields = ('name', 'password', 'moderator')
+        fields = ('name', 'password', 'moderator', 'god_can_delete_posts')
 
 
 class RoomChangeForm(forms.ModelForm):
@@ -259,7 +259,7 @@ class RoomChangeForm(forms.ModelForm):
 
     class Meta:
         model = Room
-        fields = ('password', 'clear_password', 'moderator')
+        fields = ('password', 'clear_password', 'moderator', 'god_can_delete_posts')
 
 
 class RoomPasswordPrompt(forms.Form):

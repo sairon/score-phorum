@@ -138,6 +138,7 @@ class Room(models.Model):
     slug = AutoSlugField(populate_from='name', always_update=True)
     author = models.ForeignKey(User, related_name="created_rooms", null=True, blank=True)
     moderator = models.ForeignKey(User, related_name="moderated_rooms", null=True, blank=True)
+    god_can_delete_posts = models.BooleanField(default=True, verbose_name="god může mazat příspěvky")
     created = models.DateTimeField(auto_now_add=True)
     password = models.CharField(max_length=128, blank=True)
     password_changed = models.DateTimeField(null=True, blank=True)
@@ -246,7 +247,7 @@ class PublicMessage(Message):
             return can_be_deleted
         elif user.level == User.LEVEL_ADMIN:
             return True
-        elif user.level == User.LEVEL_GOD and self.author.level < User.LEVEL_1_DOT:
+        elif user.level == User.LEVEL_GOD and self.author.level < User.LEVEL_1_DOT and self.room.god_can_delete_posts:
             return True
         elif user in (self.room.author, self.room.moderator):
             return True

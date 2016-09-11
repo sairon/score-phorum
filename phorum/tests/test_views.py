@@ -71,6 +71,9 @@ class TestDataMixin(object):
             'unpinned2': Room.objects.create(
                     name="room2 unpinned", pinned=False
             ),
+            'unpinned_nogod': Room.objects.create(
+                name="room where gods cannot delete", pinned=False, god_can_delete_posts=False
+            ),
             'protected': Room.objects.create(
                     name="room3 protected", password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
                     password_changed=datetime.now()
@@ -308,6 +311,17 @@ class RoomViewTest(TestDataMixin, TestCase):
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Zpráva byla smazána")
         self.assertEqual(PublicMessage.objects.count(), 0)
+
+    def test_god_can_not_delete_where_disallowed(self):
+        thread = new_public_thread(self.rooms['unpinned_nogod'], self.user2)
+        assert self.client.login(username="testclient4", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned_nogod'].slug}
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+        self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
+        self.assertEqual(PublicMessage.objects.count(), 1)
 
     def test_god_can_not_delete_dot(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user3)

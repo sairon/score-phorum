@@ -170,6 +170,11 @@ class RoomViewTest(TestDataMixin, TestCase):
         response = self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['protected'].slug}))
         self.assertRedirects(response, prompt_url)
 
+    def test_invalid_page_number(self):
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs), data={'page': "1x"})
+        self.assertEqual(response.status_code, 404)
+
     def test_authenticated_can_create_thread(self):
         assert self.client.login(username="testclient1", password="password")
         room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}

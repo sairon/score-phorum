@@ -40,7 +40,10 @@ def room_view(request, room_slug):
         elif not user_can_view_protected_room(request.user, room):
             return redirect("room_password_prompt", room_slug=room_slug)
 
-    page_number = request.GET.get("page", 1)
+    try:
+        page_number = int(request.GET.get("page", 1))
+    except ValueError:
+        return HttpResponseNotFound("Invalid page number.")
 
     threads = PublicMessage.objects\
         .filter(room=room, thread=None) \
@@ -153,7 +156,10 @@ def room_mark_unread(request, room_slug):
 
 @login_required
 def inbox(request):
-    page_number = request.GET.get("page", 1)
+    try:
+        page_number = int(request.GET.get("page", 1))
+    except ValueError:
+        return HttpResponseNotFound("Invalid page number.")
 
     threads = PrivateMessage.objects\
         .filter(thread=None) \

@@ -1,5 +1,4 @@
 import os
-import json
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -7,23 +6,19 @@ from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-# load settings file with secrets
-with open(os.path.join(BASE_DIR, "score", "settings", "local_settings.json")) as f:
-    local_settings = json.loads(f.read())
-
-
-def get_local_setting(setting, default=None, local_settings=local_settings):
+def get_local_setting(setting, default=None):
     """
-    Method for fetching local settings from settings file.
+    Method for fetching local settings from env.
 
     Default value can be specified, but must not be None.
     """
+    env_key = 'PHORUM_' + setting
     try:
-        return local_settings[setting]
+        return os.environ[env_key]
     except KeyError:
         if default is not None:
             return default
-        raise ImproperlyConfigured("Missing settings value '%s'" % setting)
+        raise ImproperlyConfigured("Missing environment variable '%s'" % env_key)
 
 
 SECRET_KEY = get_local_setting("SECRET_KEY")
@@ -163,6 +158,8 @@ LOGGING = {
     }
 }
 
+EMAIL_HOST = get_local_setting("EMAIL_HOST", "localhost")
+EMAIL_PORT = get_local_setting("EMAIL_PORT", "25")
 
 BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'font', 'br', 'img', 'sub', 'sup', 'marquee', 'pre']
 BLEACH_ALLOWED_ATTRIBUTES = ['href', 'title', 'style', 'color', 'src']

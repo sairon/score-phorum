@@ -1,0 +1,43 @@
+version: "2"
+services:
+  phorum:
+    build:
+      context: "."
+      args:
+      - mode=debug
+    depends_on:
+      - postgres
+      - smtp
+    volumes:
+      - "./volumes/media:/srv/app/media:rw"
+      - "./volumes/protected:/srv/app/protected:rw"
+      - "./volumes/static:/srv/app/static:rw"
+    environment:
+      PHORUM_DB_HOST: postgres
+      PHORUM_DB_NAME: score
+      PHORUM_DB_USER: score
+      PHORUM_DB_PASSWORD: score
+      PHORUM_SECRET_KEY: dummy
+      PHORUM_EMAIL_HOST: smtp
+      PHORUM_EMAIL_PORT: 1025
+    command: "make serve"
+  nginx:
+    depends_on:
+      - phorum
+    image: "nginx:1.15.5"
+    volumes:
+      - "./dev/nginx:/etc/nginx/conf.d:ro"
+      - "./volumes/media:/srv/app/media:ro"
+      - "./volumes/protected:/srv/app/protected:ro"
+      - "./volumes/static:/srv/app/static:ro"
+    ports:
+      - "8080:80"
+  postgres:
+    image: "postgres:10.6"
+    environment:
+      POSTGRES_USER: score
+      POSTGRES_PASSWORD: score
+      POSTGRES_DB: score
+  smtp:
+    image: "python:2.7-slim"
+    command: "python -u -m smtpd -n -c DebuggingServer 0.0.0.0:1025"

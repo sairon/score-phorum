@@ -1,0 +1,22 @@
+version: "2"
+services:
+  sut:
+    build:
+      context: "."
+      args:
+      - mode=tests
+    depends_on:
+      - postgres_tests
+    environment:
+      PHORUM_DB_HOST: postgres_tests
+      PHORUM_DB_NAME: score
+      PHORUM_DB_USER: score
+      PHORUM_DB_PASSWORD: score
+      PHORUM_SECRET_KEY: dummy
+    command: "make manage.py ARG='test'"
+  postgres_tests:
+    image: "postgres:10.6"
+    environment:
+      POSTGRES_USER: score
+      POSTGRES_PASSWORD: score
+      POSTGRES_DB: score

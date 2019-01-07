@@ -1,9 +1,3 @@
 *.py[cod]
 *.s[ac]ssc
-/phorum/static/css/screen.css
-/.vagrant
-/deployment
-/media/*
-/protected/*
-/static/*
-/score/settings/local_settings.json
+/volumes

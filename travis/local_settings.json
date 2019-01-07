@@ -1,7 +1,0 @@
-{
-  "SECRET_KEY": "******** DO NOT USE THESE SETTINGS IN PRODUCTION ! ********",
-  "DB_HOST": "localhost",
-  "DB_NAME": "score",
-  "DB_USER": "postgres",
-  "DB_PASSWORD": ""
-}

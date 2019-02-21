@@ -37,7 +37,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'captcha',
     'django_bleach',
-    'floppyforms',
+    'django.forms',
     'phorum',
 )
 
@@ -74,6 +74,8 @@ TEMPLATES = [
         },
     },
 ]
+
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 WSGI_APPLICATION = 'score.wsgi.application'
 

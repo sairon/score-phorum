@@ -11,9 +11,6 @@ ENV \
     PHORUM_SECRET_KEY=dummy \
     PHORUM_EMAIL_HOST=smtp
 
-COPY ./src/requirements /usr/src/app/requirements
-COPY ./src/Gemfile /usr/src/app/Gemfile
-
 RUN \
     apt-get update && \
     apt-get install -y \
@@ -28,7 +25,12 @@ RUN \
         rsync \
         ruby-bundler \
         ruby-dev && \
-    apt-get clean && \
+    apt-get clean
+
+COPY ./src/requirements /usr/src/app/requirements
+COPY ./src/Gemfile /usr/src/app/Gemfile
+
+RUN \
     pip install --no-cache-dir -r /usr/src/app/requirements/${mode}.txt && \
     cd /usr/src/app && \
     bundle install

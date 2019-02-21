@@ -1,51 +1,17 @@
 # coding=utf-8
-import os
 from autoslug.settings import slugify
 from captcha.fields import ReCaptchaField
+from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
     UserChangeForm as DefaultUserChangeForm,
     UserCreationForm as DefaultUserCreationForm
 )
 from django.contrib.auth.hashers import check_password
-from django.core.files.base import ContentFile
-from django.db.models.fields.files import ImageFieldFile
-from django.template.defaultfilters import filesizeformat
-from django.utils.encoding import force_text
-from django.utils.html import conditional_escape
 from django.utils.translation import ugettext_lazy as _
-import floppyforms.__future__ as forms
 
+from .form_fields import AvatarImageField
 from .models import PrivateMessage, PublicMessage, Room, User, UserCustomization, UserRoomKeyring
-
-
-class AvatarImageField(forms.ImageField):
-    valid_extensions = ('jpg', 'jpeg', 'gif', 'png')
-    valid_content_types = {
-        'image/jpeg': (".jpg", ".jpeg"),
-        'image/gif': (".gif",),
-        'image/png': (".png",),
-    }
-    max_image_size = 15 * 1024  # bytes
-
-    def __init__(self, *args, **kwargs):
-        super(AvatarImageField, self).__init__(*args, **kwargs)
-
-    def clean(self, *args, **kwargs):
-        data = super(AvatarImageField, self).clean(*args, **kwargs)
-        if data and not isinstance(data, ImageFieldFile):
-            if data.content_type not in self.valid_content_types:
-                raise forms.ValidationError(u'Ikona není v přijatelném formátu (GIF, JPEG nebo PNG).')
-            if data.image.size != (40, 50):
-                raise forms.ValidationError(u'Ikona musí mít rozměry 40 x 50 px.')
-            if data.size > self.max_image_size:
-                raise forms.ValidationError(u'Ikona je příliš velká (%s), maximální povolená velikost je %s.'
-                                            % (filesizeformat(data.size), filesizeformat(self.max_image_size)))
-            ext = os.path.splitext(data.name)[1]
-            if ext.lower() not in self.valid_content_types[data.content_type]:
-                raise forms.ValidationError(u'Ikona má nesprávnou příponu.')
-
-        return data
 
 
 class BaseMessageForm(forms.ModelForm):
@@ -128,18 +94,13 @@ class AdminUserChangeForm(DefaultUserChangeForm):
         model = User
 
 
-class AvatarInput(forms.widgets.ClearableFileInput):
-    template_name = "widgets/avatar.html"
-
-
 class UserChangeForm(forms.ModelForm):
     error_messages = {
         'password_mismatch': _("The two password fields didn't match."),
         'password_incorrect': _("Your old password was entered incorrectly. "
                                 "Please enter it again."),
     }
-    avatar = AvatarImageField(required=False,
-                              widget=AvatarInput)
+    avatar = AvatarImageField(required=False)
     old_password = forms.CharField(label=_("Old password"),
                                    required=False,
                                    widget=forms.PasswordInput)

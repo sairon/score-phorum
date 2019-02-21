@@ -22,6 +22,9 @@ sass:
 serve: migrate
 	$(SERVE_CMD)
 
+test: wait-for-db
+	@python manage.py test
+
 wait-for-db:
 	@while ! nc -z $$PHORUM_DB_HOST 5432; \
 	do \
@@ -29,4 +32,4 @@ wait-for-db:
 	  sleep 1; \
 	done; \
 
-.PHONY: collectstatic manage.py migrate sass serve wait-for-db
+.PHONY: collectstatic manage.py migrate sass serve test wait-for-db

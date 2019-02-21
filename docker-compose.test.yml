@@ -13,7 +13,7 @@ services:
       PHORUM_DB_USER: score
       PHORUM_DB_PASSWORD: score
       PHORUM_SECRET_KEY: dummy
-    command: "make manage.py ARG='test'"
+    command: "make test"
   postgres_tests:
     image: "postgres:10.6"
     environment:

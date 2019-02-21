@@ -11,8 +11,6 @@ TEMPLATES[0]['OPTIONS']['loaders'] = [
 
 ALLOWED_HOSTS = ["scorephorum.cz", "www.scorephorum.cz", "beta.scorephorum.cz"]
 
-SERVER_EMAIL = "noreply@scorephorum.cz"
-
 ADMINS = (
     ("Jan Cermak", "sairon@sairon.cz"),
 )

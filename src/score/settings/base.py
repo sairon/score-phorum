@@ -162,6 +162,7 @@ LOGGING = {
 
 EMAIL_HOST = get_local_setting("EMAIL_HOST", "localhost")
 EMAIL_PORT = get_local_setting("EMAIL_PORT", "25")
+SERVER_EMAIL = "noreply@scorephorum.cz"
 
 BLEACH_ALLOWED_TAGS = ['p', 'b', 'i', 'u', 'em', 'strong', 'a', 'font', 'br', 'img', 'sub', 'sup', 'marquee', 'pre']
 BLEACH_ALLOWED_ATTRIBUTES = ['href', 'title', 'style', 'color', 'src']

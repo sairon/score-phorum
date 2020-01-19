@@ -1,4 +1,4 @@
-FROM python:2.7.15-slim
+FROM python:3.8.1-slim
 
 ARG mode=production
 
@@ -21,7 +21,6 @@ RUN \
         libpng-dev \
         make \
         netcat \
-        python-dev \
         rsync \
         ruby-bundler \
         ruby-dev && \
@@ -51,9 +50,7 @@ RUN \
 
 WORKDIR "/srv/app"
 
-VOLUME /srv/app/media
-VOLUME /srv/app/protected
-VOLUME /srv/app/static
+VOLUME ["/srv/app/media", "/srv/app/protected", "/srv/app/static"]
 
 COPY ./docker-entrypoint.sh /usr/local/bin
 

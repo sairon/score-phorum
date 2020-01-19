@@ -136,8 +136,9 @@ class Room(models.Model):
 
     name = models.CharField(max_length=64, unique=True)
     slug = AutoSlugField(populate_from='name', always_update=True)
-    author = models.ForeignKey(User, related_name="created_rooms", null=True, blank=True)
-    moderator = models.ForeignKey(User, related_name="moderated_rooms", null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_rooms", null=True, blank=True)
+    moderator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="moderated_rooms",
+                                  null=True, blank=True)
     god_can_delete_posts = models.BooleanField(default=True, verbose_name="god může mazat příspěvky")
     created = models.DateTimeField(auto_now_add=True)
     password = models.CharField(max_length=128, blank=True)
@@ -170,22 +171,23 @@ class Room(models.Model):
 class RoomVisit(models.Model):
     objects = RoomVisitManager()
 
-    room = models.ForeignKey(Room)
-    user = models.ForeignKey(User)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     visit_time = models.DateTimeField(auto_now=True)
 
 
 class UserRoomKeyring(models.Model):
-    room = models.ForeignKey(Room)
-    user = models.ForeignKey(User)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     last_successful_entry = models.DateTimeField(auto_now=True)
 
 
 class Message(models.Model):
-    thread = models.ForeignKey("self", null=True, blank=True, db_index=True,
+    thread = models.ForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, db_index=True,
                                related_name="children")
-    author = models.ForeignKey(User, related_name="posted_%(class)s")
-    recipient = models.ForeignKey(User, related_name="received_%(class)s", blank=True, null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posted_%(class)s")
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_%(class)s",
+                                  blank=True, null=True)
     text = MessageTextField()
     created = models.DateTimeField(auto_now_add=True)
     last_reply = LastReplyField(null=True, blank=True)
@@ -219,7 +221,7 @@ class Message(models.Model):
         return self.thread_id or self.pk
 
     def can_be_deleted_by(self, user):
-        if not user.is_authenticated():
+        if not user.is_authenticated:
             return False
         if self.author == user:
             return True
@@ -227,7 +229,7 @@ class Message(models.Model):
 
 
 class PublicMessage(Message):
-    room = models.ForeignKey(Room)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
 
     def delete(self, using=None):
         authors_post_counts = defaultdict(int)
@@ -238,7 +240,7 @@ class PublicMessage(Message):
             # delete message
             super(PublicMessage, self).delete(using)
             # and decrease kredyti
-            for author, post_count in authors_post_counts.iteritems():
+            for author, post_count in authors_post_counts.items():
                 author.decrease_kredyti(post_count)
 
     def can_be_deleted_by(self, user):
@@ -284,7 +286,7 @@ customization_storage = OverwritingFileSystemStorage(
 
 
 class UserCustomization(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     custom_css = RawContentFileField(null=True, blank=True,
                                      upload_to=css_upload_path, storage=customization_storage,
                                      verbose_name="Vlastní CSS")

@@ -53,9 +53,9 @@ class Migration(migrations.Migration):
                 ('text', phorum.models.MessageTextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('last_reply', phorum.models.LastReplyField(null=True, blank=True)),
-                ('author', models.ForeignKey(related_name='posted_privatemessage', to=settings.AUTH_USER_MODEL)),
-                ('recipient', models.ForeignKey(related_name='received_privatemessage', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('thread', models.ForeignKey(related_name='children', blank=True, to='phorum.PrivateMessage', null=True)),
+                ('author', models.ForeignKey(on_delete=models.CASCADE, related_name='posted_privatemessage', to=settings.AUTH_USER_MODEL)),
+                ('recipient', models.ForeignKey(on_delete=models.CASCADE, related_name='received_privatemessage', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('thread', models.ForeignKey(on_delete=models.CASCADE, related_name='children', blank=True, to='phorum.PrivateMessage', null=True)),
             ],
             options={
                 'ordering': ['created'],
@@ -69,8 +69,8 @@ class Migration(migrations.Migration):
                 ('text', phorum.models.MessageTextField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('last_reply', phorum.models.LastReplyField(null=True, blank=True)),
-                ('author', models.ForeignKey(related_name='posted_publicmessage', to=settings.AUTH_USER_MODEL)),
-                ('recipient', models.ForeignKey(related_name='received_publicmessage', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('author', models.ForeignKey(on_delete=models.CASCADE, related_name='posted_publicmessage', to=settings.AUTH_USER_MODEL)),
+                ('recipient', models.ForeignKey(on_delete=models.CASCADE, related_name='received_publicmessage', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ['created'],
@@ -87,8 +87,8 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=128, blank=True)),
                 ('password_changed', models.DateTimeField(null=True, blank=True)),
                 ('pinned', models.BooleanField(default=False)),
-                ('author', models.ForeignKey(related_name='created_rooms', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('moderator', models.ForeignKey(related_name='moderated_rooms', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('author', models.ForeignKey(on_delete=models.CASCADE, related_name='created_rooms', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('moderator', models.ForeignKey(on_delete=models.CASCADE, related_name='moderated_rooms', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
             ],
             options={
                 'ordering': ('-pinned', 'name'),
@@ -99,8 +99,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('visit_time', models.DateTimeField(auto_now=True)),
-                ('room', models.ForeignKey(to='phorum.Room')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('room', models.ForeignKey(on_delete=models.CASCADE, to='phorum.Room')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -108,8 +108,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('last_successful_entry', models.DateTimeField(auto_now=True)),
-                ('room', models.ForeignKey(to='phorum.Room')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('room', models.ForeignKey(on_delete=models.CASCADE, to='phorum.Room')),
+                ('user', models.ForeignKey(on_delete=models.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.AddField(
@@ -120,12 +120,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='publicmessage',
             name='room',
-            field=models.ForeignKey(to='phorum.Room'),
+            field=models.ForeignKey(on_delete=models.CASCADE, to='phorum.Room'),
         ),
         migrations.AddField(
             model_name='publicmessage',
             name='thread',
-            field=models.ForeignKey(related_name='children', blank=True, to='phorum.PublicMessage', null=True),
+            field=models.ForeignKey(on_delete=models.CASCADE, related_name='children', blank=True, to='phorum.PublicMessage', null=True),
         ),
         migrations.AddField(
             model_name='user',

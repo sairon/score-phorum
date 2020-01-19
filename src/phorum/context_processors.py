@@ -10,7 +10,7 @@ from .models import PrivateMessage
 
 def inbox_messages(request):
     inbox_unread_count = 0
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # get all messages to/from this user
         inbox_unread_count = PrivateMessage.objects \
             .filter(Q(author=request.user) | Q(recipient=request.user))

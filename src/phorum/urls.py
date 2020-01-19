@@ -3,13 +3,18 @@ from functools import partial
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth.views import (
-    password_reset,
-    password_reset_complete,
-    password_reset_confirm,
-    password_reset_done,
+    PasswordResetView as DefaultPasswordResetView,
+    PasswordResetCompleteView,
+    PasswordResetConfirmView,
+    PasswordResetDoneView,
 )
 
 from . import views as phorum_views
+
+
+class PasswordResetView(DefaultPasswordResetView):
+    from_email = settings.SERVER_EMAIL
+
 
 urlpatterns = [
     url(r'^$', phorum_views.room_list, name="home"),
@@ -31,9 +36,9 @@ urlpatterns = [
     url(r'^user/(?P<user_id>\d+)/custom\.(?P<res_type>css|js$)', phorum_views.custom_resource, name="custom_resource"),
 
     # Password reset links
-    url(r'^user/password/reset/$', partial(password_reset, from_email=settings.SERVER_EMAIL), name='password_reset'),
-    url(r'^user/password/reset/done/$', password_reset_done, name='password_reset_done'),
+    url(r'^user/password/reset/$', PasswordResetView.as_view(), name='password_reset'),
+    url(r'^user/password/reset/done/$', PasswordResetDoneView.as_view(), name='password_reset_done'),
     url(r'^user/password/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
-        password_reset_confirm, name='password_reset_confirm'),
-    url(r'^user/password/reset/complete/$', password_reset_complete, name='password_reset_complete'),
+        PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    url(r'^user/password/reset/complete/$', PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 ]

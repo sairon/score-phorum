@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('custom_css', phorum.models.fields.RawContentFileField(storage=phorum.models.OverwritingFileSystemStorage(base_url=b'/protected', location=b'/home/kpt/projects/score-phorum/protected'), upload_to=phorum.models.utils.css_upload_path, null=True, verbose_name=b'Vlastn\xc3\xad CSS', blank=True)),
                 ('custom_js', phorum.models.fields.RawContentFileField(storage=phorum.models.OverwritingFileSystemStorage(base_url=b'/protected', location=b'/home/kpt/projects/score-phorum/protected'), upload_to=phorum.models.utils.js_upload_path, null=True, verbose_name=b'Vlastn\xc3\xad JS', blank=True)),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
     ]

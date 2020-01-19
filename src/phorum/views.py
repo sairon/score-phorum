@@ -4,15 +4,14 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import login as auth_login
 from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
 from django.utils.http import is_safe_url
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
@@ -34,7 +33,7 @@ def room_view(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
 
     if room.protected:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             messages.error(request, "Do zaheslovaných místností mají přístup pouze přihlášení uživatelé.")
             return redirect("home")
         elif not user_can_view_protected_room(request.user, room):
@@ -50,7 +49,7 @@ def room_view(request, room_slug):
         .order_by("-last_reply") \
         .prefetch_related("author", "children__author", "children__recipient", "room", "children__room")
 
-    max_threads = request.user.max_thread_roots if request.user.is_authenticated() else 10
+    max_threads = request.user.max_thread_roots if request.user.is_authenticated else 10
 
     paginator = Paginator(threads, max_threads)
     threads = paginator.page(page_number)
@@ -61,7 +60,7 @@ def room_view(request, room_slug):
 
     last_visit_time = None
     new_posts = None
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         # activity tracking - update last room
         request.session['last_action'] = {
             'name': room.name,
@@ -232,7 +231,7 @@ def room_list(request):
     rooms = Room.objects.annotate(total_messages=Count("publicmessage"),
                                   last_message_time=Max("publicmessage__created"))
 
-    visits = RoomVisit.objects.visits_for_user(request.user) if request.user.is_authenticated() else None
+    visits = RoomVisit.objects.visits_for_user(request.user) if request.user.is_authenticated else None
 
     return render(request, "phorum/room_list.html", {
         'rooms': rooms,
@@ -273,7 +272,7 @@ def login(request):
             request.user.save(update_fields=['last_ip'])
             redirect_to = request.POST.get("next",
                                            request.GET.get("next", ""))
-            if not is_safe_url(url=redirect_to, host=request.get_host()):
+            if not is_safe_url(url=redirect_to, allowed_hosts=request.get_host()):
                 redirect_to = reverse("home")
             return HttpResponseRedirect(redirect_to)
         else:

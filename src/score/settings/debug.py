@@ -8,9 +8,9 @@ INSTALLED_APPS += (
 
 SENDFILE_BACKEND = "sendfile.backends.development"
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-) + MIDDLEWARE_CLASSES
+) + MIDDLEWARE
 
 # Use default Google test keys and silence error
 del RECAPTCHA_PUBLIC_KEY

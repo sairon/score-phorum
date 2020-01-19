@@ -3,14 +3,14 @@ import os
 import random
 import string
 from datetime import datetime
+from unittest import mock
 
-import mock
 from autoslug.utils import slugify
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY
-from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from user_sessions.utils.tests import Client
 
 from phorum.models.utils import make_resource_upload_path, css_upload_path, js_upload_path
@@ -106,33 +106,33 @@ class RoomListTest(TestDataMixin, TestCase):
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content, r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
 
     def test_unread_count_resets(self):
         message1 = new_public_thread(self.rooms['pinned1'], self.user1)
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content, r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
         # visit room to reset counter
         self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['pinned1'].slug}))
         # check home again
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content, r'<span class="post-count">\s*0/2\s*</span>')
+        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*0/2\s*</span>')
 
     def test_unread_count_increases(self):
         message1 = new_public_thread(self.rooms['pinned1'], self.user1)
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content, r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
         # visit room to reset counter
         self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['pinned1'].slug}))
         # send new reply
         public_reply(message1, self.user2)
         # check home again
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content, r'<span class="post-count">\s*1/3\s*</span>')
+        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*1/3\s*</span>')
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])

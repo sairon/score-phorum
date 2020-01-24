@@ -5,6 +5,6 @@ django-autoslug==1.9.6
 django-bleach==0.6.1
 django-recaptcha==2.0.5
 django-sendfile==0.3.11
-django-user-sessions==1.7.0
+django-user-sessions==1.7.1
 psycopg2-binary==2.8.4
 uWSGI==2.0.18

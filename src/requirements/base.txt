@@ -1,4 +1,4 @@
-Django==2.2.20
+Django==2.2.21
 Pillow==8.1.1
 bleach==3.3.0
 django-autoslug==1.9.6

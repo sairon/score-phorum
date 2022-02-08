@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, Paginator
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
@@ -52,7 +52,11 @@ def room_view(request, room_slug):
     max_threads = request.user.max_thread_roots if request.user.is_authenticated else 10
 
     paginator = Paginator(threads, max_threads)
-    threads = paginator.page(page_number)
+
+    try:
+        threads = paginator.page(page_number)
+    except EmptyPage:
+        return HttpResponseNotFound("Invalid page number.")
 
     for thread in threads:
         thread.child_messages = list(thread.children.all())
@@ -167,7 +171,11 @@ def inbox(request):
         .prefetch_related("author", "children__author", "children__recipient")
 
     paginator = Paginator(threads, request.user.max_thread_roots)
-    threads = paginator.page(page_number)
+
+    try:
+        threads = paginator.page(page_number)
+    except EmptyPage:
+        return HttpResponseNotFound("Invalid page number.")
 
     for thread in threads:
         thread.child_messages = list(thread.children.all())

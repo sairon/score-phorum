@@ -170,7 +170,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
         }
         form = UserChangeForm(data, instance=user)
         form.save()
-        self.assertEqual(set_password.call_count, 1)
+        self.assertEqual(set_password.call_count, 2)  # called once extra in check_password
 
     @mock.patch("django.contrib.auth.models.AbstractBaseUser.set_password")
     def test_password_unchanged_if_not_set_password(self, set_password):

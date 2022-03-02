@@ -1,4 +1,4 @@
-{% load score_tags staticfiles %}
+{% load score_tags static %}
 
 <div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}"
      data-thread-id="{{ message.thread_reply_id }}"

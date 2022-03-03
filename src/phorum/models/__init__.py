@@ -267,8 +267,10 @@ class PublicMessage(Message):
             now = timezone.now()
             in_delete_period = (now - self.created).seconds < settings.ACTUAL_DELETE_PERIOD_SECONDS
 
-            if in_delete_period:
-                if user == self.author or user.is_admin:
+            if user.is_admin:
+                self.delete()
+            elif in_delete_period:
+                if user == self.author:
                     self.delete()
                 else:
                     self.deleted_by = user

@@ -372,7 +372,8 @@ class RoomViewTest(TestDataMixin, TestCase):
 
     def test_admin_can_delete_everything(self):
         for user in (self.user1, self.user2, self.user3, self.user4, self.user_admin):
-            thread = new_public_thread(self.rooms['unpinned1'], user)
+            created = timezone.now() - timedelta(seconds=settings.ACTUAL_DELETE_PERIOD_SECONDS + 5)
+            thread = new_public_thread(self.rooms['unpinned1'], user, created=created)
             assert self.client.login(username="the_admin", password="password")
             room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
             response = self.client.get(reverse("message_delete", kwargs={'message_id': thread.id}))

@@ -47,7 +47,9 @@ def room_view(request, room_slug):
     threads = PublicMessage.objects\
         .filter(room=room, thread=None) \
         .order_by("-last_reply") \
-        .prefetch_related("author", "children__author", "children__recipient", "room", "children__room")
+        .prefetch_related("author", "children__author", "children__recipient",
+                          "room", "children__room",
+                          "deleted_by", "children__deleted_by")
 
     max_threads = request.user.max_thread_roots if request.user.is_authenticated else 10
 
@@ -254,11 +256,7 @@ def message_delete(request, message_id):
     is_private = request.GET.get("inbox", 0) == "1"
     message = get_object_or_404(PrivateMessage if is_private else PublicMessage, pk=message_id)
 
-    if message.can_be_deleted_by(request.user):
-        if not is_private:
-            kredyti_penalty = 1 if request.user == message.author else 5
-            message.author.decrease_kredyti(kredyti_penalty)
-        message.delete()
+    if message.delete_by(request.user):
         messages.info(request, "Zpráva byla smazána.")
     else:
         messages.error(request, "Nemáte oprávnění ke smazání zprávy.")

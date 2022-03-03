@@ -97,6 +97,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
     @property
+    def is_admin(self):
+        return self.level == User.LEVEL_ADMIN
+
+    @property
     def level(self):
         if self.level_override is not None:
             return self.level_override
@@ -207,6 +211,7 @@ class Message(models.Model):
         return self
 
     def delete(self, using=None):
+        """Actual delete of the message and the eventual thread below."""
         with transaction.atomic():
             super(Message, self).delete(using)
             if self.thread:
@@ -216,6 +221,9 @@ class Message(models.Model):
                 root = self.__class__.objects.get(pk=self.thread.pk)
                 root.last_reply = max_date_in_thread
                 root.save()
+
+    def delete_by(self, user):
+        raise NotImplementedError()
 
     @property
     def thread_reply_id(self):
@@ -231,8 +239,14 @@ class Message(models.Model):
 
 class PublicMessage(Message):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    deleted_by = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
+
+    @property
+    def deleted(self):
+        return self.deleted_by is not None
 
     def delete(self, using=None):
+        """Actual delete of the message and the eventual thread below."""
         authors_post_counts = defaultdict(int)
         if self.children:
             for child in self.children.all():
@@ -244,11 +258,34 @@ class PublicMessage(Message):
             for author, post_count in authors_post_counts.items():
                 author.decrease_kredyti(post_count)
 
+    def delete_by(self, user):
+        """Method to use when user deletes a message."""
+        if self.can_be_deleted_by(user):
+            kredyti_penalty = 1 if user == self.author else 5
+            self.author.decrease_kredyti(kredyti_penalty)
+
+            now = timezone.now()
+            in_delete_period = (now - self.created).seconds < settings.ACTUAL_DELETE_PERIOD_SECONDS
+
+            if in_delete_period:
+                if user == self.author or user.is_admin:
+                    self.delete()
+                else:
+                    self.deleted_by = user
+                    self.save()
+            else:
+                self.deleted_by = user
+                self.save()
+
+            return True
+        else:
+            return False
+
     def can_be_deleted_by(self, user):
         can_be_deleted = super(PublicMessage, self).can_be_deleted_by(user)
         if can_be_deleted is not None:
             return can_be_deleted
-        elif user.level == User.LEVEL_ADMIN:
+        elif user.is_admin:
             return True
         elif user.level == User.LEVEL_GOD and self.author.level < User.LEVEL_1_DOT and self.room.god_can_delete_posts:
             return True
@@ -259,6 +296,12 @@ class PublicMessage(Message):
 
 class PrivateMessage(Message):
     private = True
+
+    def delete_by(self, user):
+        if self.can_be_deleted_by(user):
+            self.delete()
+            return True
+        return False
 
     def can_be_deleted_by(self, user):
         can_be_deleted = super(PrivateMessage, self).can_be_deleted_by(user)

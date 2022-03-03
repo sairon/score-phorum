@@ -15,12 +15,26 @@
     word-wrap: break-word
     line-height: normal
 
-  &:not(.reply)
+  &.deleted
+    margin-bottom: 0.5em
+
+    .flags
+      filter: grayscale(100%)
+
     .meta
-      background-color: darken($message-meta-color, 20)
+      background-color: #999
 
     .text
+      font-style: italic
+      min-height: auto
+
+  &:not(.reply)
+    .text
       min-height: 70px // min-height so jump-to-new fits
+
+  &:not(.reply):not(.deleted)
+    .meta
+      background-color: darken($message-meta-color, 20)
 
   .flags
     display: none
@@ -83,7 +97,11 @@
     &.reply
       margin-left: 45px
 
-    &:not(.reply)
+    &.reply.deleted
+      .text
+        display: none
+
+    &:not(.reply):not(.deleted)
       .meta
         background-color: $message-meta-color
 

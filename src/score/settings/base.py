@@ -187,3 +187,7 @@ SENDFILE_URL = "/protected"
 
 
 ACTIVE_USERS_TIMEOUT = 20  # minutes
+
+
+# period for allowing actual delete of the message by the message author, otherwise just mark as deleted
+ACTUAL_DELETE_PERIOD_SECONDS = 300

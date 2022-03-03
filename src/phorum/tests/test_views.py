@@ -2,7 +2,7 @@
 import os
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import mock
 
 from autoslug.utils import slugify
@@ -11,13 +11,12 @@ from django.contrib.auth import SESSION_KEY
 from django.http import HttpResponse
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from user_sessions.utils.tests import Client
 
-from phorum.models.utils import make_resource_upload_path, css_upload_path, js_upload_path
-from phorum.utils import get_custom_resource_filename
+from phorum.models.utils import  css_upload_path, js_upload_path
 from .utils import new_public_thread, public_reply
-from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserRoomKeyring, customization_storage, \
-    UserCustomization
+from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserRoomKeyring, UserCustomization
 
 
 class TestDataMixin(object):
@@ -295,6 +294,34 @@ class RoomViewTest(TestDataMixin, TestCase):
         self.assertContains(response, "Zpráva byla smazána")
         self.assertEqual(PublicMessage.objects.count(), 0)
 
+    def test_delete_hides_old_messages(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        created = timezone.now() - timedelta(seconds=settings.ACTUAL_DELETE_PERIOD_SECONDS + 5)
+        msg = public_reply(thread, self.user1, created=created)
+        assert self.client.login(username="testclient1", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': msg.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+        self.assertContains(response, "Zpráva byla smazána")
+        self.assertContains(response, "Zprávu odstranil")
+        self.assertEqual(PublicMessage.objects.count(), 2)
+
+    def test_delete_removes_fresh_messages(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        created = timezone.now() - timedelta(seconds=settings.ACTUAL_DELETE_PERIOD_SECONDS - 5)
+        msg = public_reply(thread, self.user1, created=created)
+        assert self.client.login(username="testclient1", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': msg.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+        self.assertContains(response, "Zpráva byla smazána")
+        self.assertNotContains(response, "Zprávu odstranil")
+        self.assertEqual(PublicMessage.objects.count(), 1)
+
     def test_can_not_delete_others_messages(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user2)
         assert self.client.login(username="testclient1", password="password")
@@ -304,9 +331,10 @@ class RoomViewTest(TestDataMixin, TestCase):
                              fetch_redirect_response=False)
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
+        self.assertNotContains(response, "Zprávu odstranil")
         self.assertEqual(PublicMessage.objects.count(), 1)
 
-    def test_god_can_delete_maroon(self):
+    def test_god_can_set_deleted_maroon(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user2)
         assert self.client.login(username="testclient4", password="password")
         room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
@@ -315,7 +343,8 @@ class RoomViewTest(TestDataMixin, TestCase):
                              fetch_redirect_response=False)
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Zpráva byla smazána")
-        self.assertEqual(PublicMessage.objects.count(), 0)
+        self.assertContains(response, "Zprávu odstranil")
+        self.assertEqual(PublicMessage.objects.count(), 1)
 
     def test_god_can_not_delete_where_disallowed(self):
         thread = new_public_thread(self.rooms['unpinned_nogod'], self.user2)
@@ -326,6 +355,7 @@ class RoomViewTest(TestDataMixin, TestCase):
                              fetch_redirect_response=False)
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
+        self.assertNotContains(response, "Zprávu odstranil")
         self.assertEqual(PublicMessage.objects.count(), 1)
 
     def test_god_can_not_delete_dot(self):
@@ -337,6 +367,7 @@ class RoomViewTest(TestDataMixin, TestCase):
                              fetch_redirect_response=False)
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
+        self.assertNotContains(response, "Zprávu odstranil")
         self.assertEqual(PublicMessage.objects.count(), 1)
 
     def test_admin_can_delete_everything(self):
@@ -351,7 +382,7 @@ class RoomViewTest(TestDataMixin, TestCase):
             self.assertContains(response, "Zpráva byla smazána")
             self.assertEqual(PublicMessage.objects.count(), 0)
 
-    def test_room_author_can_delete_others_messages(self):
+    def test_room_author_can_set_deleted_others_messages(self):
         room = Room.objects.create(
             name="new room",
             author=self.user1,
@@ -364,7 +395,8 @@ class RoomViewTest(TestDataMixin, TestCase):
                              fetch_redirect_response=False)
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
         self.assertContains(response, "Zpráva byla smazána")
-        self.assertEqual(PublicMessage.objects.count(), 0)
+        self.assertContains(response, "Zprávu odstranil")
+        self.assertEqual(PublicMessage.objects.count(), 1)
 
     def test_author_can_edit_room(self):
         room = Room.objects.create(

@@ -1,6 +1,6 @@
 {% load score_tags static %}
 
-<div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}"
+<div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}{% if message.deleted %} deleted{% endif %}"
      data-thread-id="{{ message.thread_reply_id }}"
      data-author-id="{{ message.author.pk }}"
      data-author="{{ message.author.username }}">
@@ -8,33 +8,39 @@
     <div class="flags">
       {% if request.user.is_authenticated %}
         {% if message|is_newer_than:last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
-        <img src="{% static "img/message-icon.gif" %}" class="send-reply">
+        <img src="{% static "img/message-icon.gif" %}"{% if not message.deleted %} class="send-reply"{% endif %}>
       {% endif %}
     </div>
-    <div class="meta">
+    <div class="meta"{% if message.deleted %} title="Zprávu odstranil(a): {{ message.deleted_by.username }}"{% endif %}>
       <div class="author">
         <b>od:</b> {{ message.author.username }}
-        {% if message|can_be_deleted_by:request.user %}
+        {% if request.user.is_admin or not message.deleted and message|can_be_deleted_by:request.user %}
           <span class="delete-link">- <a href="{% url "message_delete" message_id=message.id %}{% if message.private %}?inbox=1{% endif %}">smaž</a></span>
         {% endif %}
       </div>
       <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
       <div class="time" title="{{ message.created }}">
         {{ message.created|date:"d.m. H:i" }}
-        {% if message|can_be_deleted_by:request.user %}
+        {% if request.user.is_admin or not message.deleted and message|can_be_deleted_by:request.user %}
           <a href="{% url "message_delete" message_id=message.id %}{% if message.private %}?inbox=1{% endif %}" class="delete-link-mobile">&times;</a>
         {% endif %}
       </div>
     </div>
   </div>
-  <div class="avatar">
-    <img class="send-reply" src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
-    <div class="level-{{ message.author.level }}"></div>
-    {% if not message.thread %}
-        <div class="jump-to-new{% if message.children and request.user.is_authenticated and message.last_child|is_newer_than:last_visit_time %} in-thread{% endif %}"></div>
-    {% endif %}
-  </div>
-  <div class="text">{{ message.text|safe }}</div>
+  {% if not message.thread or not message.deleted %} {# also show avator for deleted top-level post #}
+    <div class="avatar">
+      <img{% if not message.deleted %} class="send-reply"{% endif %} src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
+      <div class="level-{{ message.author.level }}"></div>
+      {% if not message.thread %}
+          <div class="jump-to-new{% if message.children and request.user.is_authenticated and message.last_child|is_newer_than:last_visit_time %} in-thread{% endif %}"></div>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if not message.deleted %}
+    <div class="text">{{ message.text|safe }}</div>
+  {% else %}
+    <div class="text">Zprávu odstranil(a): {{ message.deleted_by.username }}</div>
+  {% endif %}
 </div>
 
 {% if not message.thread %}

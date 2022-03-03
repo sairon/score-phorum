@@ -14,6 +14,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import ugettext_lazy as _
 
 from .fields import MessageTextField, LastReplyField, RawContentFileField
@@ -268,19 +269,23 @@ class PrivateMessage(Message):
         return False
 
 
+@deconstructible
 class OverwritingFileSystemStorage(FileSystemStorage):
     """
     FileSystemStorage that overwrites the file when a file with given
     filename already exists. Operation is not atomic - old file is removed
     first and then a new one is saved.
     """
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("location", os.path.join(settings.SENDFILE_ROOT))
+        super().__init__(*args, **kwargs)
+
     def get_available_name(self, name, max_length=None):
         self.delete(name)
         return name
 
 
 customization_storage = OverwritingFileSystemStorage(
-    location=os.path.join(settings.SENDFILE_ROOT),
     base_url=settings.SENDFILE_URL
 )
 

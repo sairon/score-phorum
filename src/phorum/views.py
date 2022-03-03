@@ -238,8 +238,8 @@ def message_send(request, room_slug):
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 def room_list(request):
-    rooms = Room.objects.annotate(total_messages=Count("publicmessage"),
-                                  last_message_time=Max("publicmessage__created"))
+    rooms = Room.objects.all().annotate(total_messages=Count("publicmessage"),
+                                        last_message_time=Max("publicmessage__created")).order_by("name")
 
     visits = RoomVisit.objects.visits_for_user(request.user) if request.user.is_authenticated else None
 

@@ -19,10 +19,10 @@
     margin-bottom: 0.5em
 
     .flags
-      filter: grayscale(100%)
+      opacity: 0.25
 
     .meta
-      background-color: #999
+      opacity: 0.25
 
     .text
       font-style: italic
@@ -32,7 +32,7 @@
     .text
       min-height: 70px // min-height so jump-to-new fits
 
-  &:not(.reply):not(.deleted)
+  &:not(.reply):not(.deleted):not(.new-message)
     .meta
       background-color: darken($message-meta-color, 20)
 
@@ -101,7 +101,7 @@
       .text
         display: none
 
-    &:not(.reply):not(.deleted)
+    &:not(.reply):not(.deleted):not(.new-message)
       .meta
         background-color: $message-meta-color
 

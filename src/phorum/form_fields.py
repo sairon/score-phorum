@@ -60,7 +60,7 @@ class EditableFileTextarea(forms.widgets.Input):
 
     def render(self, name, value, attrs=None, renderer=None):
         try:
-            value = value and value.read()  # read only non-empty fields
+            value = value and value.read().decode("utf-8")  # read only non-empty fields
         except IOError:
             value = ""
         return super(EditableFileTextarea, self).render(name, value or "", attrs=attrs, renderer=renderer)

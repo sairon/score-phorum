@@ -8,6 +8,7 @@ from unittest import mock
 from autoslug.utils import slugify
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY
+from django.db.models.fields.files import FieldFile
 from django.http import HttpResponse
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -784,6 +785,17 @@ class UserManagementTest(TestDataMixin, TestCase):
             handle = m()
             self.assertEqual(handle.write.call_args_list, [mock.call(custom_css), mock.call(custom_js)])
             self.assertRedirects(response, reverse("user_customization"), fetch_redirect_response=False)
+
+        def field_file_read(field_file):
+            if field_file.name.endswith(".css"):
+                return b"kokos-css"
+            elif field_file.name.endswith(".js"):
+                return b"kokos-js"
+
+        with mock.patch.object(FieldFile, "read", field_file_read):
+            response = self.client.get(reverse("user_customization"))
+            self.assertContains(response, 'id="id_custom_css">\nkokos-css</textarea>')
+            self.assertContains(response, 'id="id_custom_js">\nkokos-js</textarea>')
 
     def test_user_customization_get(self):
         assert self.client.login(username="testclient1", password="password")

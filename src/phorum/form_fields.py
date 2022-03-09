@@ -62,7 +62,7 @@ class EditableFileTextarea(forms.widgets.Input):
         try:
             value = value and value.read()  # read only non-empty fields
         except IOError:
-            pass
+            value = ""
         return super(EditableFileTextarea, self).render(name, value or "", attrs=attrs, renderer=renderer)
 
 

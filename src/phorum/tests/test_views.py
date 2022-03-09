@@ -752,6 +752,21 @@ class UserManagementTest(TestDataMixin, TestCase):
         response = self.client.get(reverse("user_edit"))
         self.assertContains(response, "Profil uživatele upraven")
 
+    def test_user_customization_no_file(self):
+        assert self.client.login(username="testclient1", password="password")
+        customization_mock = mock.Mock()
+        customization_mock.user = self.user1
+        css_path = css_upload_path(customization_mock, "anything")
+        js_path = js_upload_path(customization_mock, "anything")
+
+        UserCustomization.objects.create(
+            user=self.user1, custom_css=css_path, custom_js=js_path
+        )
+
+        response = self.client.get(reverse("user_customization"))
+        self.assertContains(response, 'id="id_custom_css">\n</textarea>')
+        self.assertContains(response, 'id="id_custom_js">\n</textarea>')
+
     def test_user_customization_create(self):
         assert self.client.login(username="testclient1", password="password")
         # Generate some random text

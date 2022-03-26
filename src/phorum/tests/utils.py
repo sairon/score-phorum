@@ -19,6 +19,7 @@ def new_public_thread(room, author, recipient=None, text=None, created=None):
 def public_reply(parent_message, author, recipient=None, text=None, created=None):
     """Tests helper for creating replies to existing messages."""
     msg = PublicMessage.objects.create(
+            thread=parent_message,
             room=parent_message.room, author=author,
             recipient=recipient or parent_message.author,
             text=text or "text"

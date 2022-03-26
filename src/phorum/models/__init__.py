@@ -202,15 +202,16 @@ class Message(models.Model):
         ordering = ['created']
 
     def save(self, *args, **kwargs):
+        keep_last_reply = kwargs.pop('keep_last_reply', False)
         super(Message, self).save(*args, **kwargs)
-        if self.thread:
+        if self.thread and not keep_last_reply:
             # update last_reply on parent
             root = self.__class__.objects.get(pk=self.thread.pk)
             root.last_reply = self.created
             root.save()
         return self
 
-    def delete(self, using=None):
+    def delete(self, using=None, keep_last_reply=False):
         """Actual delete of the message and the eventual thread below."""
         with transaction.atomic():
             super(Message, self).delete(using)
@@ -274,10 +275,10 @@ class PublicMessage(Message):
                     self.delete()
                 else:
                     self.deleted_by = user
-                    self.save()
+                    self.save(keep_last_reply=True)
             else:
                 self.deleted_by = user
-                self.save()
+                self.save(keep_last_reply=True)
 
             return True
         else:

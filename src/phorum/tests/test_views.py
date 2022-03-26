@@ -1,6 +1,7 @@
 # coding=utf-8
 import os
 import random
+import re
 import string
 from datetime import datetime, timedelta
 from unittest import mock
@@ -308,6 +309,47 @@ class RoomViewTest(TestDataMixin, TestCase):
         self.assertContains(response, "Zpráva byla smazána")
         self.assertContains(response, "Zprávu odstranil")
         self.assertEqual(PublicMessage.objects.count(), 2)
+
+    def test_delete_old_does_not_change_order(self):
+        """
+        Initial structure:
+
+        10:00 thread_newer
+          - 10:00 reply1 <- delete this
+          - 10:10 reply3
+        10:00 thread_older
+          - 10:05 reply2
+
+        Order should stay unchanged after deleting reply1.
+        """
+        t1000 = timezone.now().replace(year=2000, hour=10, minute=0)
+        t1005 = timezone.now().replace(year=2000, hour=10, minute=5)
+        t1010 = timezone.now().replace(year=2000, hour=10, minute=10)
+
+        thread_older = new_public_thread(self.rooms['unpinned1'], self.user1, text="thread_older", created=t1000)
+        public_reply(thread_older, self.user1, created=t1005)  # reply2
+
+        thread_newer = new_public_thread(self.rooms['unpinned1'], self.user1, text="thread_newer", created=t1000)
+        msg = public_reply(thread_newer, self.user1, created=t1000)  # reply1
+        public_reply(thread_newer, self.user1, created=t1010)  # reply3
+
+        assert self.client.login(username="testclient1", password="password")
+        room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
+
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+
+        self.assertRegexpMatches(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
+
+        response = self.client.get(reverse("message_delete", kwargs={'message_id': msg.id}))
+        self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
+                             fetch_redirect_response=False)
+        response = self.client.get(reverse("room_view", kwargs=room_kwargs))
+
+        self.assertContains(response, "Zpráva byla smazána")
+        self.assertContains(response, "Zprávu odstranil")
+        self.assertRegexpMatches(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
+        self.assertEqual(PublicMessage.objects.count(), 5)
+
 
     def test_delete_removes_fresh_messages(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)

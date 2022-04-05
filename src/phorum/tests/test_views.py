@@ -739,6 +739,13 @@ class AuthenticationTest(TestDataMixin, TestCase):
         self.assertContains(response, "Neplatný login nebo heslo")
         self.assertNotIn(settings.SESSION_COOKIE_NAME, self.client.cookies)
 
+    def test_password_reset(self):
+        data = {
+            'email': self.user1.email,
+        }
+        response = self.client.post(reverse("password_reset"), data)
+        self.assertRedirects(response, reverse("password_reset_done"), fetch_redirect_response=False)
+
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class UserManagementTest(TestDataMixin, TestCase):

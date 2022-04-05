@@ -8,7 +8,7 @@ from django.contrib.auth.forms import (
     UserCreationForm as DefaultUserCreationForm
 )
 from django.contrib.auth.hashers import check_password
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .form_fields import AvatarImageField
 from .models import PrivateMessage, PublicMessage, Room, User, UserCustomization, UserRoomKeyring

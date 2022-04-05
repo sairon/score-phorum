@@ -107,33 +107,33 @@ class RoomListTest(TestDataMixin, TestCase):
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
 
     def test_unread_count_resets(self):
         message1 = new_public_thread(self.rooms['pinned1'], self.user1)
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
         # visit room to reset counter
         self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['pinned1'].slug}))
         # check home again
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*0/2\s*</span>')
+        self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*0/2\s*</span>')
 
     def test_unread_count_increases(self):
         message1 = new_public_thread(self.rooms['pinned1'], self.user1)
         public_reply(message1, self.user2)
         assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
+        self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*2\s*</span>')
         # visit room to reset counter
         self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['pinned1'].slug}))
         # send new reply
         public_reply(message1, self.user2)
         # check home again
         response = self.client.get(reverse("home"))
-        self.assertRegexpMatches(response.content.decode('utf-8'), r'<span class="post-count">\s*1/3\s*</span>')
+        self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*1/3\s*</span>')
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
@@ -338,7 +338,7 @@ class RoomViewTest(TestDataMixin, TestCase):
 
         response = self.client.get(reverse("room_view", kwargs=room_kwargs))
 
-        self.assertRegexpMatches(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
+        self.assertRegex(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
 
         response = self.client.get(reverse("message_delete", kwargs={'message_id': msg.id}))
         self.assertRedirects(response, reverse("room_view", kwargs=room_kwargs),
@@ -347,7 +347,7 @@ class RoomViewTest(TestDataMixin, TestCase):
 
         self.assertContains(response, "Zpráva byla smazána")
         self.assertContains(response, "Zprávu odstranil")
-        self.assertRegexpMatches(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
+        self.assertRegex(response.content, re.compile(br"thread_newer.*thread_older", re.DOTALL))
         self.assertEqual(PublicMessage.objects.count(), 5)
 
 

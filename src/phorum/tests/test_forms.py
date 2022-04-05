@@ -2,7 +2,7 @@ import datetime
 from unittest import mock
 
 from django.test import TestCase, override_settings
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 
 from ..forms import PrivateMessageForm, UserChangeForm
 from ..models import PrivateMessage, User
@@ -79,7 +79,7 @@ class PrivateMessageFormTest(TestDataMixin, TestCase):
         form = PrivateMessageForm(data, author=self.user3)
         self.assertFalse(form.is_valid())
         self.assertEqual(form['thread'].errors,
-                         [force_text(form.error_messages['invalid_thread'])])
+                         [force_str(form.error_messages['invalid_thread'])])
 
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
@@ -95,7 +95,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
         form = UserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["old_password"].errors,
-                         [force_text(form.error_messages['password_incorrect'])])
+                         [force_str(form.error_messages['password_incorrect'])])
 
     def test_password_verification(self):
         # The two new passwords do not match.
@@ -109,7 +109,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
         form = UserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
         self.assertEqual(form["new_password2"].errors,
-                         [force_text(form.error_messages['password_mismatch'])])
+                         [force_str(form.error_messages['password_mismatch'])])
 
     def test_password_verification_empty(self):
         # The two new passwords do not match.
@@ -132,7 +132,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
             form = UserChangeForm(data, instance=user)
             self.assertFalse(form.is_valid())
             self.assertEqual(form.errors['__all__'],
-                             [force_text(form.error_messages['password_mismatch'])])
+                             [force_str(form.error_messages['password_mismatch'])])
 
     def test_password_required(self):
         user = User.objects.get(username='testclient')
@@ -145,7 +145,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
         form = UserChangeForm(data, instance=user)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors['__all__'],
-                         [force_text(form.error_messages['password_incorrect'])])
+                         [force_str(form.error_messages['password_incorrect'])])
 
     def test_success(self):
         # The success case.

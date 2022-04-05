@@ -12,7 +12,7 @@ from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
-from django.utils.http import is_safe_url
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import mark_safe
 from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
@@ -278,7 +278,7 @@ def login(request):
             request.user.save(update_fields=['last_ip'])
             redirect_to = request.POST.get("next",
                                            request.GET.get("next", ""))
-            if not is_safe_url(url=redirect_to, allowed_hosts=request.get_host()):
+            if not url_has_allowed_host_and_scheme(url=redirect_to, allowed_hosts=request.get_host()):
                 redirect_to = reverse("home")
             return HttpResponseRedirect(redirect_to)
         else:

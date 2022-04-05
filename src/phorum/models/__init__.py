@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from .fields import MessageTextField, LastReplyField, RawContentFileField
 from .managers import UserManager, RoomVisitManager

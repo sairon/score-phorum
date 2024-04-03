@@ -1,5 +1,5 @@
 Django==3.2.25
-Pillow==10.2.0
+Pillow==10.3.0
 bleach==4.1.0
 django-autoslug==1.9.8
 django-bleach==1.0.0

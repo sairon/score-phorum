@@ -1,4 +1,4 @@
-FROM python:3.8.12-slim
+FROM python:3.8.19-slim
 
 ARG mode=production
 
@@ -20,7 +20,7 @@ RUN \
         libffi-dev \
         libpng-dev \
         make \
-        netcat \
+        netcat-traditional \
         rsync \
         ruby-bundler \
         ruby-dev && \

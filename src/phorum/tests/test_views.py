@@ -829,7 +829,7 @@ class UserManagementTest(TestDataMixin, TestCase):
 
         m = mock.mock_open()
 
-        with mock.patch("os.open"), mock.patch("fcntl.flock"), mock.patch("os.chmod"), mock.patch("os.close"), mock.patch("os.fdopen", m):
+        with mock.patch("os.open"), mock.patch("fcntl.flock"), mock.patch("os.chmod"), mock.patch("os.close"), mock.patch("os.path.isdir"), mock.patch("os.stat"), mock.patch("os.fdopen", m):
             response = self.client.post(reverse("user_customization"), data)
             handle = m()
             self.assertEqual(handle.write.call_args_list, [mock.call(custom_css), mock.call(custom_js)])

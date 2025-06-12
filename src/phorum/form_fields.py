@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models.fields.files import ImageFieldFile
 from django.template.defaultfilters import filesizeformat
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import conditional_escape
 
 
@@ -56,7 +56,7 @@ class EditableFileTextarea(forms.widgets.Input):
         super(EditableFileTextarea, self).__init__(default_attrs)
 
     def _format_value(self, value):
-        return conditional_escape(force_text(value))
+        return conditional_escape(force_str(value))
 
     def render(self, name, value, attrs=None, renderer=None):
         try:

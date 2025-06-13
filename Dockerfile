@@ -1,4 +1,4 @@
-FROM python:3.9.22-slim
+FROM python:3.11.13-slim
 
 ARG mode=production
 

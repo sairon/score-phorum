@@ -35,7 +35,7 @@ INSTALLED_APPS = (
     'user_sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'captcha',
+    'django_recaptcha',
     'django_bleach',
     'django.forms',
     'phorum',

@@ -1,6 +1,7 @@
 import datetime
 from unittest import mock
 
+from django.contrib.auth.hashers import get_hasher
 from django.test import TestCase, override_settings
 from django.utils.encoding import force_str
 
@@ -15,27 +16,30 @@ class TestDataMixin(object):
 
     @classmethod
     def setUpTestData(cls):
+        pw_hasher = get_hasher()
+        password = pw_hasher.encode("password", salt=pw_hasher.salt())
+
         cls.user1 = User.objects.create(
-            password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            password=password,
             last_login=datetime.datetime(2006, 12, 17, 7, 3, 31), is_superuser=False, username='testclient',
             email='testclient@example.com', is_staff=False, is_active=True,
             date_joined=datetime.datetime(2006, 12, 17, 7, 3, 31)
         )
         cls.user2 = User.objects.create(
-            password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            password=password,
             last_login=datetime.datetime(2006, 12, 17, 7, 3, 31), is_superuser=False, username='testclient2',
             email='testclient2@example.com', is_staff=False, is_active=True,
             date_joined=datetime.datetime(2006, 12, 17, 7, 3, 31)
         )
         cls.user3 = User.objects.create(
-            password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            password=password,
             last_login=datetime.datetime(2006, 12, 17, 7, 3, 31), is_superuser=False, username='testclient3',
             email='testclient3@example.com', is_staff=False, is_active=True,
             date_joined=datetime.datetime(2006, 12, 17, 7, 3, 31)
         )
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class PrivateMessageFormTest(TestDataMixin, TestCase):
     def setUp(self):
         self.u1_to_u2 = PrivateMessage.objects.create(
@@ -82,7 +86,7 @@ class PrivateMessageFormTest(TestDataMixin, TestCase):
                          [force_str(form.error_messages['invalid_thread'])])
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class UserChangeFormTest(TestDataMixin, TestCase):
     def test_incorrect_password(self):
         user = User.objects.get(username='testclient')
@@ -170,7 +174,7 @@ class UserChangeFormTest(TestDataMixin, TestCase):
         }
         form = UserChangeForm(data, instance=user)
         form.save()
-        self.assertEqual(set_password.call_count, 2)  # called once extra in check_password
+        self.assertEqual(set_password.call_count, 1)
 
     @mock.patch("django.contrib.auth.models.AbstractBaseUser.set_password")
     def test_password_unchanged_if_not_set_password(self, set_password):

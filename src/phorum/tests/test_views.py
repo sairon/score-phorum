@@ -9,6 +9,7 @@ from unittest import mock
 from autoslug.utils import slugify
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY
+from django.contrib.auth.hashers import get_hasher
 from django.db.models.fields.files import FieldFile
 from django.http import HttpResponse
 from django.test import TestCase, override_settings
@@ -23,42 +24,45 @@ from ..models import PrivateMessage, PublicMessage, Room, RoomVisit, User, UserR
 class TestDataMixin(object):
     @classmethod
     def setUpTestData(cls):
+        pw_hasher = get_hasher()
+        password = pw_hasher.encode("password", salt=pw_hasher.salt())
+        
         # Green ribbon
         cls.user1 = User.objects.create(
-            username='testclient1', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='testclient1', password=password,
             email='testclient1@example.com', is_staff=False, is_active=True,
             kredyti=0
         )
         assert cls.user1.level == User.LEVEL_GREEN
         # Maroon ribbon
         cls.user2 = User.objects.create(
-            username='testclient2', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='testclient2', password=password,
             email='testclient2@example.com', is_staff=False, is_active=True,
             kredyti=3100
         )
         assert cls.user2.level == User.LEVEL_MAROON
         # One dot
         cls.user3 = User.objects.create(
-            username='testclient3', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='testclient3', password=password,
             email='testclient3@example.com', is_staff=False, is_active=True,
             kredyti=6100
         )
         assert cls.user3.level == User.LEVEL_1_DOT
         # God
         cls.user4 = User.objects.create(
-            username='testclient4', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='testclient4', password=password,
             email='testclient3@example.com', is_staff=False, is_active=True,
             kredyti=36000
         )
         assert cls.user4.level == User.LEVEL_GOD
         # admin
         cls.user_admin = User.objects.create(
-            username='the_admin', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='the_admin', password=password,
             email='the_admin@example.com', is_staff=False, is_active=True,
             kredyti=1, level_override=User.LEVEL_ADMIN
         )
         cls.user_inactive = User.objects.create(
-            username='inactive', password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+            username='inactive', password=password,
             email='inactive@example.com', is_staff=False, is_active=False
         )
         cls.rooms = {
@@ -75,13 +79,13 @@ class TestDataMixin(object):
                 name="room where gods cannot delete", pinned=False, god_can_delete_posts=False
             ),
             'protected': Room.objects.create(
-                    name="room3 protected", password='sha1$6efc0$f93efe9fd7542f25a7be94871ea45aa95de57161',
+                    name="room3 protected", password=password,
                     password_changed=datetime.now()
             )
         }
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class RoomListTest(TestDataMixin, TestCase):
 
     def test_rooms_present(self):
@@ -134,7 +138,7 @@ class RoomListTest(TestDataMixin, TestCase):
         self.assertRegex(response.content.decode('utf-8'), r'<span class="post-count">\s*1/3\s*</span>')
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class RoomViewTest(TestDataMixin, TestCase):
 
     def test_protected_kicks_unauthenticated(self):
@@ -559,7 +563,7 @@ class RoomViewTest(TestDataMixin, TestCase):
         self.assertEqual(RoomVisit.objects.filter(room=room, user=self.user1).count(), 0)
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class InboxText(TestDataMixin, TestCase):
 
     def _create_test_messages(self):
@@ -692,7 +696,7 @@ class InboxText(TestDataMixin, TestCase):
         self.assertContains(response, "Nemáte oprávnění ke smazání zprávy")
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class AuthenticationTest(TestDataMixin, TestCase):
 
     def test_login(self):
@@ -742,7 +746,7 @@ class AuthenticationTest(TestDataMixin, TestCase):
         self.assertRedirects(response, reverse("password_reset_done"), fetch_redirect_response=False)
 
 
-@override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
+@override_settings(USE_TZ=False)
 class UserManagementTest(TestDataMixin, TestCase):
 
     def setUp(self):

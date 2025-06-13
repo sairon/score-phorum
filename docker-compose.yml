@@ -1,4 +1,3 @@
-version: "2"
 services:
   phorum:
     build:
@@ -35,7 +34,7 @@ services:
       - "8080:80"
     restart: always
   postgres:
-    image: "postgres:10.6"
+    image: "postgres:16.9"
     environment:
       POSTGRES_USER: score
       POSTGRES_PASSWORD: score

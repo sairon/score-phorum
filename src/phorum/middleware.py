@@ -1,10 +1,10 @@
 import django.contrib.sessions.middleware
 from django.utils.deprecation import MiddlewareMixin
-import user_sessions.middleware
+import qsessions.middleware
 
 
 class UserSessionsMiddleware(
-  user_sessions.middleware.SessionMiddleware,
+  qsessions.middleware.SessionMiddleware,
   django.contrib.sessions.middleware.SessionMiddleware,
 ):
     pass

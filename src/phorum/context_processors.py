@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
-from user_sessions.models import Session
+from qsessions.models import Session
 
 from .models import PrivateMessage
 
@@ -31,7 +31,7 @@ def active_users(request):
     active_threshold = now() - timedelta(minutes=settings.ACTIVE_USERS_TIMEOUT)
 
     active_users_count = Session.objects\
-        .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
+        .filter(user__isnull=False, expire_date__gte=now(), updated_at__gte=active_threshold)\
         .distinct('user__username')\
         .count()
 

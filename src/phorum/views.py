@@ -19,7 +19,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_POST
 import sendfile
-from user_sessions.models import Session
+from qsessions.models import Session
 
 from .forms import (
     LoginForm, PrivateMessageForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
@@ -353,7 +353,7 @@ def users(request):
     active_threshold = now() - timedelta(minutes=settings.ACTIVE_USERS_TIMEOUT)
 
     sessions = Session.objects\
-        .filter(user__isnull=False, expire_date__gte=now(), last_activity__gte=active_threshold)\
+        .filter(user__isnull=False, expire_date__gte=now(), updated_at__gte=active_threshold)\
         .prefetch_related('user')\
         .order_by('user__username')\
         .distinct('user__username')

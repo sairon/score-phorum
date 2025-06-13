@@ -32,7 +32,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'user_sessions',
+    'qsessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_recaptcha',
@@ -52,7 +52,7 @@ MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-SESSION_ENGINE = 'user_sessions.backends.db'
+SESSION_ENGINE = 'qsessions.backends.db'
 
 ROOT_URLCONF = 'score.urls'
 

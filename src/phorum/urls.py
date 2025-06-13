@@ -31,7 +31,7 @@ urlpatterns = [
     path('user/customization', phorum_views.user_customization, name="user_customization"),
     path('users/', phorum_views.users, name="users"),
     path('message/<message_id>/delete', phorum_views.message_delete, name="message_delete"),
-    re_path('^user/(?P<user_id>\d+)/custom\.(?P<res_type>css|js)$', phorum_views.custom_resource, name="custom_resource"),
+    re_path(r'^user/(?P<user_id>\d+)/custom\.(?P<res_type>css|js)$', phorum_views.custom_resource, name="custom_resource"),
 
     # Password reset links
     path('user/password/reset/', PasswordResetView.as_view(), name='password_reset'),

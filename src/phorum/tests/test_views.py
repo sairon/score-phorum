@@ -14,7 +14,6 @@ from django.http import HttpResponse
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-from user_sessions.utils.tests import Client
 
 from phorum.models.utils import  css_upload_path, js_upload_path
 from .utils import new_public_thread, public_reply
@@ -84,7 +83,6 @@ class TestDataMixin(object):
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class RoomListTest(TestDataMixin, TestCase):
-    client_class = Client
 
     def test_rooms_present(self):
         response = self.client.get(reverse("home"))
@@ -138,7 +136,6 @@ class RoomListTest(TestDataMixin, TestCase):
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class RoomViewTest(TestDataMixin, TestCase):
-    client_class = Client
 
     def test_protected_kicks_unauthenticated(self):
         response = self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['protected'].slug}))
@@ -564,7 +561,6 @@ class RoomViewTest(TestDataMixin, TestCase):
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class InboxText(TestDataMixin, TestCase):
-    client_class = Client
 
     def _create_test_messages(self):
         thread = PrivateMessage.objects.create(
@@ -698,7 +694,6 @@ class InboxText(TestDataMixin, TestCase):
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class AuthenticationTest(TestDataMixin, TestCase):
-    client_class = Client
 
     def test_login(self):
         data = {
@@ -749,7 +744,6 @@ class AuthenticationTest(TestDataMixin, TestCase):
 
 @override_settings(USE_TZ=False, PASSWORD_HASHERS=['django.contrib.auth.hashers.SHA1PasswordHasher'])
 class UserManagementTest(TestDataMixin, TestCase):
-    client_class = Client
 
     def setUp(self):
         os.environ['RECAPTCHA_TESTING'] = "True"

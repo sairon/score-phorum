@@ -1,6 +1,6 @@
 # coding=utf-8
 from autoslug.settings import slugify
-from captcha.fields import ReCaptchaField
+from django_recaptcha.fields import ReCaptchaField
 from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,

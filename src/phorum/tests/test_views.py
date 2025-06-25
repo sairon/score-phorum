@@ -830,7 +830,7 @@ class UserManagementTest(TestDataMixin, TestCase):
         with mock.patch("os.open"), mock.patch("fcntl.flock"), mock.patch("os.chmod"), mock.patch("os.close"), mock.patch("os.path.isdir"), mock.patch("os.stat"), mock.patch("os.fdopen", m):
             response = self.client.post(reverse("user_customization"), data)
             handle = m()
-            self.assertEqual(handle.write.call_args_list, [mock.call(custom_css), mock.call(custom_js)])
+            self.assertEqual(handle.write.call_args_list, [mock.call(custom_css.encode("utf-8")), mock.call(custom_js.encode("utf-8"))])
             self.assertRedirects(response, reverse("user_customization"), fetch_redirect_response=False)
 
         def field_file_read(field_file):

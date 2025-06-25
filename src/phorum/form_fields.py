@@ -84,7 +84,7 @@ class RawContentFileField(forms.FileField):
         return data
 
     def to_python(self, data):
-        data = ContentFile(data)
+        data = ContentFile(data.encode("utf-8"))
         data.name = "_"  # MUST NOT be empty to pass bool(self) check of File
 
         try:

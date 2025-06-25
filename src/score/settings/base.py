@@ -181,7 +181,7 @@ NOCAPTCHA = True
 RECAPTCHA_USE_SSL = True
 
 
-SENDFILE_BACKEND = "sendfile.backends.nginx"
+SENDFILE_BACKEND = "django_sendfile.backends.nginx"
 SENDFILE_ROOT = os.path.join(BASE_DIR, "protected")
 SENDFILE_URL = "/protected"
 

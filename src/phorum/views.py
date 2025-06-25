@@ -18,7 +18,7 @@ from django.utils.timezone import now
 from django.views.decorators.cache import cache_control
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.http import require_POST
-import sendfile
+from django_sendfile import sendfile
 from qsessions.models import Session
 
 from .forms import (
@@ -371,8 +371,8 @@ def custom_resource(request, user_id, res_type):
     customization = get_object_or_404(UserCustomization, user_id=user_id)
     if res_type == "css":
         if customization.custom_css:
-            return sendfile.sendfile(request, customization.custom_css.path)
+            return sendfile(request, customization.custom_css.path)
     elif res_type == "js":
         if customization.custom_js:
-            return sendfile.sendfile(request, customization.custom_js.path)
+            return sendfile(request, customization.custom_js.path)
     return HttpResponseNotFound("Requested resource does not exist.")

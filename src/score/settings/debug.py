@@ -6,7 +6,7 @@ INSTALLED_APPS += (
     'debug_toolbar',
 )
 
-SENDFILE_BACKEND = "sendfile.backends.development"
+SENDFILE_BACKEND = "django_sendfile.backends.development"
 
 MIDDLEWARE = (
     'debug_toolbar.middleware.DebugToolbarMiddleware',

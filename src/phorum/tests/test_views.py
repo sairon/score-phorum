@@ -26,7 +26,7 @@ class TestDataMixin(object):
     def setUpTestData(cls):
         pw_hasher = get_hasher()
         password = pw_hasher.encode("password", salt=pw_hasher.salt())
-        
+
         # Green ribbon
         cls.user1 = User.objects.create(
             username='testclient1', password=password,
@@ -855,14 +855,14 @@ class UserManagementTest(TestDataMixin, TestCase):
             user=self.user1, custom_css=css_path, custom_js=js_path
         )
 
-        with mock.patch("sendfile.sendfile") as sendfile:
+        with mock.patch("phorum.views.sendfile") as sendfile:
             sendfile.return_value = HttpResponse()
             response = self.client.get(reverse("custom_resource", args=(self.user1.id, "js")))
             self.assertEqual(response.status_code, 200, response.content)
             sendfile.assert_called_once_with(response.wsgi_request,
                                              os.path.join(settings.SENDFILE_ROOT, js_path))
 
-        with mock.patch("sendfile.sendfile") as sendfile:
+        with mock.patch("phorum.views.sendfile") as sendfile:
             sendfile.return_value = HttpResponse()
             response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
             self.assertEqual(response.status_code, 200, response.content)
@@ -905,7 +905,7 @@ class UserManagementTest(TestDataMixin, TestCase):
 
         # First user should be able to get his resources.
         assert self.client.login(username="testclient1", password="password")
-        with mock.patch("sendfile.sendfile") as sendfile:
+        with mock.patch("phorum.views.sendfile") as sendfile:
             sendfile.return_value = HttpResponse()
             response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
             self.assertEqual(response.status_code, 200)
@@ -914,7 +914,7 @@ class UserManagementTest(TestDataMixin, TestCase):
 
         # Second user should not be able to get first user's resources.
         assert self.client.login(username="testclient2", password="password")
-        with mock.patch("sendfile.sendfile") as sendfile:
+        with mock.patch("phorum.views.sendfile") as sendfile:
             sendfile.return_value = HttpResponse()
             response = self.client.get(reverse("custom_resource", args=(self.user1.id, "css")))
             self.assertEqual(response.status_code, 403)

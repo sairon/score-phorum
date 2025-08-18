@@ -13,7 +13,7 @@ RUN \
     bundle exec compass compile
 
 # Python build
-FROM python:3.13.6-slim AS build
+FROM python:3.13.7-slim AS build
 
 ARG mode=production
 
@@ -58,7 +58,7 @@ RUN \
     make collectstatic
 
 # Final image
-FROM python:3.13.6-slim
+FROM python:3.13.7-slim
 
 ARG mode=production
 

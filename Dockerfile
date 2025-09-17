@@ -1,5 +1,5 @@
 # Sass -> CSS build
-FROM ruby:3.4.5-slim AS sass
+FROM ruby:3.4.6-slim AS sass
 
 COPY ./src/phorum/static /usr/src/app/phorum/static
 

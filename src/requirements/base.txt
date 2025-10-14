@@ -7,4 +7,4 @@ django-recaptcha==4.1.0
 django-sendfile2==0.7.2
 django-qsessions==2.1.0
 psycopg2-binary==2.9.11
-uWSGI==2.0.30
+uWSGI==2.0.31

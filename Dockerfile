@@ -13,7 +13,7 @@ RUN \
     bundle exec compass compile
 
 # Python build
-FROM python:3.13.7-slim AS build
+FROM python:3.14.0-slim AS build
 
 ARG mode=production
 
@@ -58,7 +58,7 @@ RUN \
     make collectstatic
 
 # Final image
-FROM python:3.13.7-slim
+FROM python:3.14.0-slim
 
 ARG mode=production
 
@@ -85,7 +85,7 @@ VOLUME ["/srv/app/media", "/srv/app/protected", "/srv/app/static"]
 
 COPY ./docker-entrypoint.sh /usr/local/bin
 
-COPY --from=build /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=build /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /usr/src/app /usr/src/app
 

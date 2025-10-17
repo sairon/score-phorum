@@ -85,7 +85,7 @@ VOLUME ["/srv/app/media", "/srv/app/protected", "/srv/app/static"]
 
 COPY ./docker-entrypoint.sh /usr/local/bin
 
-COPY --from=build /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=build /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /usr/src/app /usr/src/app
 

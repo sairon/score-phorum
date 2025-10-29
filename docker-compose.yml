@@ -24,7 +24,7 @@ services:
   nginx:
     depends_on:
       - phorum
-    image: "nginx:1.29.2"
+    image: "nginx:1.29.3"
     volumes:
       - "./dev/nginx:/etc/nginx/conf.d:ro"
       - "./volumes/media:/srv/app/media:ro"

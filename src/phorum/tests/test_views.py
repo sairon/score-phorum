@@ -771,6 +771,17 @@ class ThreadViewTest(TestDataMixin, TestCase):
             'room_slug': self.rooms['protected'].slug
         }))
 
+    def test_thread_view_protected_room_with_keyring(self):
+        thread = new_public_thread(self.rooms['protected'], self.user1)
+        assert self.client.login(username="testclient1", password="password")
+        UserRoomKeyring.objects.create(room=self.rooms['protected'], user=self.user1)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['protected'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'phorum/thread_view.html')
+
     def test_thread_view_shows_all_replies(self):
         thread = new_public_thread(self.rooms['unpinned1'], self.user1, text="root_post_text")
         reply1 = public_reply(thread, self.user2, text="reply_1_text")

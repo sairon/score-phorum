@@ -8,7 +8,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, Paginator
 from django.db.models import Count, Max, Q
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
@@ -102,22 +102,22 @@ def thread_view(request, room_slug, thread_id):
         elif not user_can_view_protected_room(request.user, room):
             return redirect("room_password_prompt", room_slug=room_slug)
 
-    # get the message - validates it belongs to this room
-    message = get_object_or_404(PublicMessage, pk=thread_id, room=room)
-
-    # if this is a reply, redirect to the root thread with anchor
-    if message.thread_id:
-        return redirect(
-            reverse("thread_view", kwargs={'room_slug': room_slug, 'thread_id': message.thread_id})
-            + f"#post-{thread_id}"
-        )
-
-    # this is a root thread - fetch it with children
-    thread = PublicMessage.objects.filter(pk=thread_id)\
+    # get the message with prefetched children - validates it belongs to this room
+    thread = PublicMessage.objects.filter(pk=thread_id, room=room)\
         .prefetch_related("author", "children__author", "children__recipient",
                           "room", "children__room",
                           "deleted_by", "children__deleted_by")\
         .first()
+
+    if not thread:
+        raise Http404("Thread not found")
+
+    # if this is a reply, redirect to the root thread with anchor
+    if thread.thread_id:
+        return redirect(
+            reverse("thread_view", kwargs={'room_slug': room_slug, 'thread_id': thread.thread_id})
+            + f"#post-{thread_id}"
+        )
 
     thread.child_messages = list(thread.children.all())
     thread.last_child = thread.child_messages[-1] if len(thread.child_messages) else None

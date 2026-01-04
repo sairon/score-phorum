@@ -12,9 +12,9 @@
     "sass": "^1.97.1"
   },
   "scripts": {
-    "sass": "sass --style=compressed --load-path=node_modules phorum/static/sass/screen.sass:phorum/static/css/screen.css && npm run postcss",
+    "sass": "npm run sass:compile && npm run postcss",
     "sass:compile": "sass --style=compressed --load-path=node_modules phorum/static/sass/screen.sass:phorum/static/css/screen.css",
-    "sass:watch": "concurrently \"sass --watch --style=compressed --load-path=node_modules phorum/static/sass/screen.sass:phorum/static/css/screen.css\" \"postcss --watch phorum/static/css/screen.css -o phorum/static/css/screen.css --no-map\"",
+    "sass:watch": "concurrently \"npm run sass:compile\" \"postcss --watch phorum/static/css/screen.css -o phorum/static/css/screen.css --no-map\"",
     "postcss": "postcss phorum/static/css/screen.css -o phorum/static/css/screen.css --no-map"
   }
 }

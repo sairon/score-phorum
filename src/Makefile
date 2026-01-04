@@ -45,4 +45,4 @@ wait-for-db:
 	  sleep 1; \
 	done; \
 
-.PHONY: collectstatic manage.py migrate sass sass-watch serve test wait-for-db
+.PHONY: collectstatic manage.py migrate sass sass-watch serve test wait-for-db with-node

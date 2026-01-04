@@ -3,7 +3,7 @@ FROM node:24-slim AS sass
 
 WORKDIR /usr/src/app
 
-COPY ./src/package.json ./src/package-lock.json ./
+COPY ./src/package.json ./src/package-lock.json ./src/postcss.config.js ./
 
 RUN npm ci --ignore-scripts
 

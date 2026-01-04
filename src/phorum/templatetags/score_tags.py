@@ -55,7 +55,7 @@ def highlight_search(text, query):
 
     Handles:
     - HTML content (doesn't highlight inside tags)
-    - Wildcard patterns (* → .*) for words only
+    - Wildcard patterns (* → \S*) for words only (non-whitespace)
     - Case-insensitive matching
     - Diacritics-insensitive matching
     - Multiple tokens (quoted phrases and words)

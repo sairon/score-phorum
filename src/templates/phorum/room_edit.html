@@ -3,7 +3,7 @@
 {% block content %}
   <form action="{% url "room_edit" room_slug=room.slug %}" method="post">
     <table>
-      {{ form }}
+      {{ form.as_table }}
       <tr>
         <th></th>
         <td>

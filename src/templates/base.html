@@ -37,7 +37,7 @@
         {% if login_form and request.user.is_anonymous%}
           <form action="{% url "login" %}" method="post">
             {% csrf_token %}
-            {{ login_form }}
+            {{ login_form.as_table }}
             <input type="hidden" name="next" value="{{ next }}">
             <input type="submit" value="Login">
           </form>

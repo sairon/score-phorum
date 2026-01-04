@@ -11,7 +11,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.mail import send_mail
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
-from django.db.models import Q
+from django.db.models import Lookup, Q
 from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
@@ -21,6 +21,19 @@ from .fields import MessageTextField, LastReplyField, RawContentFileField
 from .managers import UserManager, RoomVisitManager
 from .querysets import RoomQueryset
 from .utils import css_upload_path, js_upload_path
+
+
+class UnaccentIRegex(Lookup):
+    """Case-insensitive regex match with diacritics normalization.
+
+    Uses PostgreSQL's ~* operator with unaccent() on both sides.
+    """
+    lookup_name = 'unaccent_iregex'
+
+    def as_sql(self, compiler, connection):
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+        rhs, rhs_params = self.process_rhs(compiler, connection)
+        return f"unaccent({lhs}) ~* unaccent(%s)", lhs_params + rhs_params
 
 
 class User(AbstractBaseUser, PermissionsMixin):

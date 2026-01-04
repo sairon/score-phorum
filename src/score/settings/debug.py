@@ -18,5 +18,8 @@ del RECAPTCHA_PRIVATE_KEY
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": lambda x: True
+    "SHOW_TOOLBAR_CALLBACK": lambda request: not any(
+        request.path.startswith(p) for p in ["/media/", "/static/"]
+    ),
+    "PRETTIFY_SQL": False,
 }

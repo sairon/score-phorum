@@ -1019,3 +1019,150 @@ class UserManagementTest(TestDataMixin, TestCase):
             self.assertEqual(response.status_code, 403)
             response = self.client.get(reverse("custom_resource", args=(self.user1.id, "js")))
             self.assertEqual(response.status_code, 403)
+
+
+@override_settings(USE_TZ=False)
+class SearchTest(TestDataMixin, TestCase):
+
+    def test_search_page_loads(self):
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("search"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Vyhledávání")
+
+    def test_search_requires_minimum_chars(self):
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("search"), {'q': 'a'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "minimum 2 znaky")
+
+    def test_search_finds_exact_match(self):
+        assert self.client.login(username="testclient1", password="password")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="hello world")
+        response = self.client.get(reverse("search"), {'q': 'hello'})
+        # Text is highlighted, so check for highlighted version
+        self.assertContains(response, 'class="search-highlight">hello</mark> world')
+
+    def test_search_word_boundary(self):
+        """'koko' should find 'koko tyčka' but not 'kokos'"""
+        assert self.client.login(username="testclient1", password="password")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="koko tyčka")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="kokos")
+
+        response = self.client.get(reverse("search"), {'q': 'koko'})
+        # Text is highlighted - check for highlighted match
+        self.assertContains(response, 'class="search-highlight">koko</mark> tyčka')
+        # Should only find 1 result (koko tyčka), not 2 (kokos should be excluded)
+        self.assertEqual(response.context['page'].paginator.count, 1)
+
+    def test_search_wildcard(self):
+        """'*kos' should find both 'kokos' and other matching words"""
+        assert self.client.login(username="testclient1", password="password")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="kokos")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="velkos")
+
+        response = self.client.get(reverse("search"), {'q': '*kos'})
+        self.assertEqual(response.context['page'].paginator.count, 2)
+
+    def test_search_diacritics_insensitive(self):
+        """'*kos' should find 'koš' (with háček)"""
+        assert self.client.login(username="testclient1", password="password")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="koš na prádlo")
+
+        response = self.client.get(reverse("search"), {'q': '*kos'})
+        # Text is highlighted, check for the highlighted match and rest of text
+        self.assertContains(response, 'class="search-highlight">koš</mark> na prádlo')
+
+    def test_search_case_insensitive(self):
+        assert self.client.login(username="testclient1", password="password")
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="Hello World")
+
+        response = self.client.get(reverse("search"), {'q': 'hello'})
+        # Text is highlighted - check for the match (original case preserved)
+        self.assertContains(response, 'class="search-highlight">Hello</mark> World')
+
+        response = self.client.get(reverse("search"), {'q': 'HELLO'})
+        self.assertContains(response, 'class="search-highlight">Hello</mark> World')
+
+    def test_search_excludes_deleted(self):
+        assert self.client.login(username="testclient1", password="password")
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1, text="secret message")
+        thread.deleted_by = self.user1
+        thread.save()
+
+        response = self.client.get(reverse("search"), {'q': 'secret'})
+        self.assertNotContains(response, "secret message")
+
+    def test_search_shows_thread_for_matching_reply(self):
+        assert self.client.login(username="testclient1", password="password")
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1, text="root post")
+        public_reply(thread, self.user2, text="matching reply")
+
+        response = self.client.get(reverse("search"), {'q': 'matching'})
+        # Should show root post with the matching reply (highlighted)
+        self.assertContains(response, "root post")
+        self.assertContains(response, 'class="search-highlight">matching</mark> reply')
+
+    def test_search_pagination(self):
+        assert self.client.login(username="testclient1", password="password")
+        # Create more threads than default page size (10)
+        for i in range(15):
+            new_public_thread(self.rooms['unpinned1'], self.user1, text=f"searchable text {i}")
+
+        response = self.client.get(reverse("search"), {'q': 'searchable'})
+        self.assertTrue(response.context['page'].has_next())
+
+    def test_search_respects_user_page_size(self):
+        assert self.client.login(username="testclient1", password="password")
+        self.user1.max_thread_roots = 5
+        self.user1.save()
+
+        for i in range(10):
+            new_public_thread(self.rooms['unpinned1'], self.user1, text=f"findme {i}")
+
+        response = self.client.get(reverse("search"), {'q': 'findme'})
+        self.assertEqual(len(response.context['threads']), 5)
+
+    def test_search_unprotected_room_visible(self):
+        """Authenticated users should see results from unprotected rooms"""
+        new_public_thread(self.rooms['unpinned1'], self.user1, text="public content")
+
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("search"), {'q': 'content'})
+        # Text is highlighted - check for highlighted match
+        self.assertContains(response, 'class="search-highlight">content</mark>')
+
+    def test_search_protected_room_visible_with_access(self):
+        """Users with keyring access should see results from protected rooms"""
+        UserRoomKeyring.objects.create(room=self.rooms['protected'], user=self.user1)
+        new_public_thread(self.rooms['protected'], self.user1, text="protected content")
+
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("search"), {'q': 'protected'})
+        # Text is highlighted
+        self.assertContains(response, 'class="search-highlight">protected</mark> content')
+
+    def test_search_protected_room_hidden_without_access(self):
+        """Users without keyring access should not see results from protected rooms"""
+        UserRoomKeyring.objects.create(room=self.rooms['protected'], user=self.user1)
+        new_public_thread(self.rooms['protected'], self.user1, text="protected content")
+
+        # Login as user2 who doesn't have access
+        assert self.client.login(username="testclient2", password="password")
+        response = self.client.get(reverse("search"), {'q': 'protected'})
+        self.assertNotContains(response, "protected content")
+
+    def test_search_menu_link_authenticated(self):
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("home"))
+        self.assertContains(response, 'href="/search"')
+        self.assertContains(response, "vyhledávání")
+
+    def test_search_requires_login(self):
+        response = self.client.get(reverse("search"))
+        # Should redirect to login
+        self.assertRedirects(response, "/?next=/search")
+
+    def test_search_menu_link_not_shown_for_anonymous(self):
+        response = self.client.get(reverse("home"))
+        self.assertNotContains(response, 'href="/search"')

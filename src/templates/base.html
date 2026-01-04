@@ -50,6 +50,7 @@
             {% if request.path != "/" %}
               <li><a href="{% url "home" %}">místnosti</a></li>
             {% endif %}
+            <li><a href="{% url "search" %}">vyhledávání</a></li>
             {% if new_posts >= 0 %}
               <li>nové příspěvky: {{ new_posts }}</li>
             {% endif %}

@@ -23,10 +23,10 @@ from qsessions.models import Session
 
 from .forms import (
     LoginForm, PrivateMessageForm, PublicMessageForm, RoomCreationForm, RoomChangeForm,
-    RoomPasswordPrompt, UserCreationForm, UserChangeForm, UserCustomizationForm
+    RoomPasswordPrompt, SearchForm, UserCreationForm, UserChangeForm, UserCustomizationForm
 )
 from .models import PrivateMessage, PublicMessage, Room, RoomVisit, UserCustomization
-from .utils import user_can_view_protected_room, get_ip_addr
+from .utils import get_ip_addr, fetch_matching_replies, get_matching_reply_ids, search_messages, user_can_view_protected_room
 
 
 def room_view(request, room_slug):
@@ -293,6 +293,62 @@ def room_list(request):
         'login_form': LoginForm(),
         'visits': visits,
         'next': request.POST.get("next", request.GET.get("next", "")),
+    })
+
+
+@login_required
+def search(request):
+    form = SearchForm(request.GET or None)
+    threads = None
+    page = None
+    query = None
+
+    if request.GET and form.is_valid():
+        query = form.cleaned_data['q']
+
+        # Get matching thread IDs (lightweight tuples)
+        thread_matches = search_messages(query, request.user)
+
+        try:
+            page_number = int(request.GET.get("page", 1))
+        except ValueError:
+            return HttpResponseNotFound("Invalid page number.")
+
+        max_threads = request.user.max_thread_roots
+        paginator = Paginator(thread_matches, max_threads)
+
+        try:
+            page = paginator.page(page_number)
+        except EmptyPage:
+            return HttpResponseNotFound("Invalid page number.")
+
+        # Extract thread IDs for this page
+        thread_ids = [t[0] for t in page]
+
+        # Fetch only the threads for this page
+        threads_qs = PublicMessage.objects.filter(
+            pk__in=thread_ids,
+            thread__isnull=True
+        ).select_related('author', 'room', 'room__author', 'room__moderator', 'recipient', 'deleted_by')
+
+        # Sort by the order from search results
+        thread_order = {t[0]: i for i, t in enumerate(page)}
+        threads = sorted(threads_qs, key=lambda t: thread_order[t.pk])
+
+        # Fetch matching reply IDs for this page's threads only
+        matching_reply_ids = get_matching_reply_ids(query, thread_ids, request.user)
+        replies_by_thread = fetch_matching_replies(thread_ids, matching_reply_ids)
+
+        # Attach matching children to each thread
+        for thread in threads:
+            thread.child_messages = replies_by_thread.get(thread.pk, [])
+
+    return render(request, "phorum/search.html", {
+        'form': form,
+        'threads': threads,
+        'page': page,
+        'query': query,
+        'login_form': LoginForm(),
     })
 
 

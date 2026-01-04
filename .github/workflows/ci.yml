@@ -9,6 +9,54 @@ permissions:
   contents: read
 
 jobs:
+  ruff-format:
+    runs-on: ubuntu-latest
+    name: Check formatting with ruff
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements/tests.txt
+      - name: Run ruff format check
+        run: |
+          pre-commit run --hook-stage manual ruff-format --all-files --show-diff-on-failure
+        env:
+          RUFF_OUTPUT_FORMAT: github
+
+  ruff-lint:
+    runs-on: ubuntu-latest
+    name: Lint with ruff
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Cache pre-commit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements/tests.txt
+      - name: Run ruff lint check
+        run: |
+          pre-commit run --hook-stage manual ruff --all-files --show-diff-on-failure
+        env:
+          RUFF_OUTPUT_FORMAT: github
+
   docker-test:
     runs-on: ubuntu-latest
     name: Docker test

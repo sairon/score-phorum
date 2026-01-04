@@ -1,0 +1,38 @@
+# Pre-commit hooks for score-phorum
+# See https://pre-commit.com for more information
+
+repos:
+  # Ruff hooks for Python linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff
+        # No --fix flag initially as requested
+        args: []
+      - id: ruff-format
+        # Only apply to Python files in src directory
+        files: ^src/.+\.py$
+
+  # Standard pre-commit hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-ast
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # Django-specific hooks
+  - repo: https://github.com/ecugol/pre-commit-hooks-django
+    rev: v0.4.0
+    hooks:
+      - id: check-django-migrations
+      - id: check-untracked-migrations

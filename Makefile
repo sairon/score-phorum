@@ -13,4 +13,23 @@ docker-publish: docker-build
 test:
 	docker compose -f docker-compose.test.yml up --build  --abort-on-container-exit --exit-code-from sut
 
-.PHONY: demo dev docker-build docker-publish test
+# Code quality commands
+ruff:
+	ruff check src/
+
+ruff-fix:
+	ruff check --fix src/
+
+ruff-format:
+	ruff format src/
+
+ruff-format-check:
+	ruff format --check src/
+
+pre-commit:
+	pre-commit run --all-files
+
+pre-commit-install:
+	pre-commit install
+
+.PHONY: demo dev docker-build docker-publish test ruff ruff-fix ruff-format ruff-format-check pre-commit pre-commit-install

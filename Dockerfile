@@ -1,16 +1,15 @@
 # Sass -> CSS build
-FROM ruby:3.4.8-slim AS sass
+FROM node:24-slim AS sass
 
-COPY ./src/phorum/static /usr/src/app/phorum/static
+WORKDIR /usr/src/app
 
-RUN \
-    --mount=type=bind,source=./src/Gemfile,target=/usr/src/app/Gemfile \
-    cd /usr/src/app/ && \
-    apt-get update && \
-    apt-get install -y git && \
-    bundle install && \
-    cd /usr/src/app/phorum/static && \
-    bundle exec compass compile
+COPY ./src/package.json ./src/package-lock.json ./
+
+RUN npm ci --ignore-scripts
+
+COPY ./src/phorum/static ./phorum/static
+
+RUN npm run sass
 
 # Python build
 FROM python:3.14.2-slim AS build

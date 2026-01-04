@@ -1,3 +1,6 @@
 *.py[cod]
 *.s[ac]ssc
+node_modules/
+/src/phorum/static/css/
+/src/static/
 /volumes

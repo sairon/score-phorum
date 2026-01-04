@@ -13,11 +13,24 @@ endif
 migrate: wait-for-db
 	@python manage.py migrate
 
+define node_container
+	docker run --rm $(1) --user $(shell id -u):$(shell id -g) \
+		-v $(PWD):/app \
+		-w /app \
+		node:24-slim \
+		sh -c "$(2)"
+endef
+
 sass:
-	@$(COMPASS_CMD) \
-	    bundler install && \
-	    cd phorum/static && \
-	    compass compile
+	$(call node_container,,npm ci --cache /tmp/.npm && npm run sass)
+
+sass-watch:
+	$(call node_container,-it,npm ci --cache /tmp/.npm && npm run sass:watch)
+
+# use as `make with-node` to run interactive shell
+# or `make with-node CMD='command'` to run a specific command
+with-node:
+	$(call node_container,-it,$(or $(CMD),sh))
 
 serve: migrate
 	$(SERVE_CMD)
@@ -32,4 +45,4 @@ wait-for-db:
 	  sleep 1; \
 	done; \
 
-.PHONY: collectstatic manage.py migrate sass serve test wait-for-db
+.PHONY: collectstatic manage.py migrate sass sass-watch serve test wait-for-db

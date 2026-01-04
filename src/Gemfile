@@ -1,5 +1,0 @@
-source 'https://rubygems.org'
-
-# compass 1.0.3 is not compatible with Ruby 3.2+, use a fixed fork
-gem 'compass', git: 'https://github.com/jeffbyrnes/compass.git', ref: '3e653766b81d32a510df5b382009e45e35b60928'
-gem 'breakpoint'

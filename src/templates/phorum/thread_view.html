@@ -15,10 +15,6 @@
   <h2 class="room-name"><a href="{% url 'room_view' room_slug=room.slug %}">místnost: {{ room.name }}</a></h2>
 
   {% include "parts/message.html" with message=thread %}
-
-  <div class="thread-navigation">
-    <a href="{% url 'room_view' room_slug=room.slug %}">&laquo; Zpět do místnosti</a>
-  </div>
 {% endblock %}
 
 {% block extra_body %}

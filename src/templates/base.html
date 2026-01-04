@@ -70,7 +70,6 @@
     {% block content %}{% endblock %}
   </div>
 
-  <script src="{% static "js/vendor/jquery-2.1.4.min.js" %}"></script>
   {% block extra_body %}{% endblock %}
   {% if request.user.usercustomization.custom_js %}
     <script src="{% url "custom_resource" res_type="js" user_id=request.user.id %}"></script>

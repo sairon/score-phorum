@@ -1,6 +1,6 @@
 {% load score_tags static %}
 
-<div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}{% if message.deleted %} deleted{% endif %}"
+<div class="message{% if message.thread_id %} reply{% endif %}{% if message.author_id == request.user.id %} sent{% elif message.recipient_id == request.user.id %} received{% endif %}{% if last_visit_time and request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}{% if message.deleted %} deleted{% endif %}"
      id="post-{{ message.pk }}"
      data-thread-id="{{ message.thread_reply_id }}"
      data-author-id="{{ message.author.pk }}"
@@ -8,7 +8,7 @@
   <div class="header">
     <div class="flags">
       {% if request.user.is_authenticated %}
-        {% if message|is_newer_than:last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
+        {% if not query and message|is_newer_than:last_visit_time %}<img src="{% static "img/new-message.gif" %}">{% endif %}
         <img src="{% static "img/message-icon.gif" %}"{% if not message.deleted %} class="send-reply"{% endif %}>
       {% endif %}
     </div>
@@ -28,24 +28,24 @@
       </div>
     </div>
   </div>
-  {% if not message.thread or not message.deleted %} {# also show avator for deleted top-level post #}
+  {% if not message.thread_id or not message.deleted %} {# also show avatar for deleted top-level post #}
     <div class="avatar">
       <img{% if not message.deleted %} class="send-reply"{% endif %} src="{% if message.author.avatar %}{{ message.author.avatar.url }}{% else %}{% static "img/rudoksicht.gif" %}{% endif %}">
       <div class="level-{{ message.author.level }}"></div>
-      {% if not message.thread %}
-          <div class="jump-to-new{% if message.children and request.user.is_authenticated and message.last_child|is_newer_than:last_visit_time %} in-thread{% endif %}"></div>
+      {% if not message.thread_id %}
+          <div class="jump-to-new{% if not query and message.children and request.user.is_authenticated and message.last_child|is_newer_than:last_visit_time %} in-thread{% endif %}"></div>
       {% endif %}
     </div>
   {% endif %}
   {% if not message.deleted %}
-    <div class="text">{{ message.text|safe }}</div>
+    <div class="text">{% if query %}{{ message.text|highlight_search:query|safe }}{% else %}{{ message.text|safe }}{% endif %}</div>
   {% else %}
     <div class="text">Zprávu odstranil(a): {{ message.deleted_by.username }}</div>
   {% endif %}
 </div>
 
-{% if not message.thread %}
+{% if not message.thread_id %}
   {% for child_message in message.child_messages %}
-    {% include "parts/message.html" with message=child_message %}
+    {% include "parts/message.html" with message=child_message query=query %}
   {% endfor %}
 {% endif %}

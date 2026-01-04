@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load score_tags static %}
+
+{% block title %}Vyhledávání: {{ query }} | {% endblock %}
+
+{% block content %}
+  <form class="search-form" action="{% url "search" %}" method="get">
+    {{ form.q }}
+    <input type="submit" value="Hledat">
+  </form>
+
+  {% if form.q.errors %}
+    <div class="form-errors">
+      {% for error in form.q.errors %}
+        <p>{{ error }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if query %}
+    {% if threads %}
+      <p class="search-results-count">Nalezeno výsledků: {{ page.paginator.count }}</p>
+
+      {% include "parts/search_results.html" %}
+    {% else %}
+      <p class="no-results">Žádné výsledky pro "{{ query }}"</p>
+    {% endif %}
+  {% else %}
+    <div class="search-help">
+      <p>
+        Použijte * jako zástupný znak. Například "pic*" najde "picař" i "pičus".<br>
+        Fráze v uvozovkách budou vyhledány tak, jak jsou napsány. Vyhledávání ignoruje diakritiku.
+      </p>
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block extra_body %}
+  <script src="{% static "js/app.js" %}"></script>
+{% endblock %}

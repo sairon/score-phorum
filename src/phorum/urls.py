@@ -18,6 +18,7 @@ urlpatterns = [
     path('', phorum_views.room_list, name="home"),
     path('inbox', phorum_views.inbox, name="inbox"),
     path('inbox/new-message', phorum_views.inbox_send, name="inbox_send"),
+    path('search', phorum_views.search, name="search"),
     path('room/new', phorum_views.room_new, name="room_new"),
     path('room/<room_slug>/', phorum_views.room_view, name="room_view"),
     path('room/<room_slug>/thread/<int:thread_id>/', phorum_views.thread_view, name="thread_view"),

@@ -260,3 +260,37 @@ class UserCustomizationForm(forms.ModelForm):
     class Meta:
         model = UserCustomization
         fields = ('custom_css', 'custom_js')
+
+
+class SearchForm(forms.Form):
+    q = forms.CharField(
+        max_length=100,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'hledaný výraz'}),
+        error_messages={
+            'required': 'Zadejte hledaný výraz.',
+        }
+    )
+
+    def clean_q(self):
+        from .utils import parse_search_query
+
+        q = self.cleaned_data['q']
+        tokens = parse_search_query(q)
+
+        if not tokens:
+            raise forms.ValidationError('Zadejte hledaný výraz.')
+
+        for token in tokens:
+            if token.is_phrase:
+                # Phrase: count all chars (wildcards are literal in phrases)
+                meaningful_chars = len(token.text)
+            else:
+                # Word: count non-whitespace, non-wildcard chars
+                meaningful_chars = sum(1 for c in token.text if c not in ' \t\n\r*')
+
+            if meaningful_chars < 2:
+                raise forms.ValidationError(
+                    f'Výraz "{token.text}" je příliš krátký (minimum 2 znaky).'
+                )
+        return q

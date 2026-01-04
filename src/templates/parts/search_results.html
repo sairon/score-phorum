@@ -1,0 +1,31 @@
+{% load score_tags static %}
+
+{% for thread in threads %}
+  <div class="search-result">
+    <div class="search-result-meta">
+      <span class="room-name">
+        <a href="{% url 'room_view' room_slug=thread.room.slug %}">{{ thread.room.name }}</a>
+      </span>
+    </div>
+
+    {% include "parts/message.html" with message=thread query=query %}
+  </div>
+
+  {% if not forloop.last %}<hr class="thread-divider">{% endif %}
+{% endfor %}
+
+<div class="pagination">
+  <span class="step-links">
+    {% if page.has_previous %}
+      <a href="?q={{ query|urlencode }}&page={{ page.previous_page_number }}">&lt;&lt;</a>
+    {% endif %}
+
+    <span class="current">
+      | stránka {{ page.number }} z {{ page.paginator.num_pages }} |
+    </span>
+
+    {% if page.has_next %}
+      <a href="?q={{ query|urlencode }}&page={{ page.next_page_number }}">&gt;&gt;</a>
+    {% endif %}
+  </span>
+</div>

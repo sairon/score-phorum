@@ -8,7 +8,7 @@
       var recipientInput = document.getElementById('id_recipient');
       var threadInput = document.getElementById('id_thread');
 
-      if (recipientInput) {
+      if (recipientInput && threadInput) {
         recipientInput.classList.add('reply');
         recipientInput.value = rootMessage.dataset.author;
         threadInput.value = rootMessage.dataset.threadId;
@@ -20,21 +20,21 @@
 
   // Clear thread when recipient changes
   var recipientInput = document.getElementById('id_recipient');
-  if (recipientInput) {
+  var threadInput = document.getElementById('id_thread');
+  if (recipientInput && threadInput) {
     recipientInput.addEventListener('input', function() {
-      document.getElementById('id_thread').value = '';
+      threadInput.value = '';
       this.classList.remove('reply');
     });
   }
 
   // Clear thread when switching to inbox
   var inboxCheckbox = document.getElementById('id_to_inbox');
-  if (inboxCheckbox) {
+  if (inboxCheckbox && threadInput) {
     inboxCheckbox.addEventListener('change', function() {
-      document.getElementById('id_thread').value = '';
-      var recipient = document.getElementById('id_recipient');
-      if (recipient) {
-        recipient.classList.remove('reply');
+      threadInput.value = '';
+      if (recipientInput) {
+        recipientInput.classList.remove('reply');
       }
     });
   }
@@ -44,6 +44,7 @@
     link.addEventListener('click', function(e) {
       if (!window.confirm('Opravdu chcete smazat příspěvek?')) {
         e.preventDefault();
+        return;
       }
     });
   });
@@ -76,7 +77,8 @@
     var target = document.querySelector(window.location.hash);
     if (target) {
       setTimeout(function() {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var targetPosition = target.getBoundingClientRect().top + window.pageYOffset - 20;
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' });
       }, 100);
     }
   }

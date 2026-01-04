@@ -29,6 +29,7 @@ from .models import PrivateMessage, PublicMessage, Room, RoomVisit, UserCustomiz
 from .utils import get_ip_addr, fetch_matching_replies, get_matching_reply_ids, search_messages, user_can_view_protected_room
 
 
+@login_required
 def room_view(request, room_slug):
     room = get_object_or_404(Room, slug=room_slug)
 
@@ -92,6 +93,7 @@ def room_view(request, room_slug):
     })
 
 
+@login_required
 def thread_view(request, room_slug, thread_id):
     room = get_object_or_404(Room, slug=room_slug)
 

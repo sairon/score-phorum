@@ -141,9 +141,10 @@ class RoomListTest(TestDataMixin, TestCase):
 @override_settings(USE_TZ=False)
 class RoomViewTest(TestDataMixin, TestCase):
 
-    def test_protected_kicks_unauthenticated(self):
-        response = self.client.get(reverse("room_view", kwargs={'room_slug': self.rooms['protected'].slug}))
-        self.assertRedirects(response, reverse("home"))
+    def test_unauthenticated_redirects_to_login(self):
+        room_url = reverse("room_view", kwargs={'room_slug': self.rooms['unpinned1'].slug})
+        response = self.client.get(room_url)
+        self.assertRedirects(response, f"/?next={room_url}")
 
     def test_protected_password_prompt(self):
         assert self.client.login(username="testclient1", password="password")
@@ -173,6 +174,7 @@ class RoomViewTest(TestDataMixin, TestCase):
         self.assertRedirects(response, prompt_url)
 
     def test_invalid_page_number(self):
+        assert self.client.login(username="testclient1", password="password")
         room_kwargs = {'room_slug': self.rooms['unpinned1'].slug}
         response = self.client.get(reverse("room_view", kwargs=room_kwargs), data={'page': "1x"})
         self.assertEqual(response.status_code, 404)
@@ -700,6 +702,7 @@ class InboxText(TestDataMixin, TestCase):
 class ThreadViewTest(TestDataMixin, TestCase):
 
     def test_thread_view_returns_200_for_root_thread(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)
         response = self.client.get(reverse("thread_view", kwargs={
             'room_slug': self.rooms['unpinned1'].slug,
@@ -708,6 +711,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_thread_view_uses_correct_template(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)
         response = self.client.get(reverse("thread_view", kwargs={
             'room_slug': self.rooms['unpinned1'].slug,
@@ -716,6 +720,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertTemplateUsed(response, 'phorum/thread_view.html')
 
     def test_thread_view_context_contains_thread(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)
         response = self.client.get(reverse("thread_view", kwargs={
             'room_slug': self.rooms['unpinned1'].slug,
@@ -724,6 +729,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertEqual(response.context['thread'], thread)
 
     def test_thread_view_reply_id_redirects_to_root_with_anchor(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)
         reply = public_reply(thread, self.user2)
         response = self.client.get(reverse("thread_view", kwargs={
@@ -737,6 +743,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     def test_thread_view_404_for_nonexistent_thread(self):
+        assert self.client.login(username="testclient1", password="password")
         response = self.client.get(reverse("thread_view", kwargs={
             'room_slug': self.rooms['unpinned1'].slug,
             'thread_id': 99999
@@ -744,6 +751,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_thread_view_404_for_wrong_room(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1)
         # Try to access thread from unpinned1 via unpinned2's slug
         response = self.client.get(reverse("thread_view", kwargs={
@@ -752,13 +760,14 @@ class ThreadViewTest(TestDataMixin, TestCase):
         }))
         self.assertEqual(response.status_code, 404)
 
-    def test_thread_view_protected_room_unauthenticated(self):
-        thread = new_public_thread(self.rooms['protected'], self.user1)
-        response = self.client.get(reverse("thread_view", kwargs={
-            'room_slug': self.rooms['protected'].slug,
+    def test_thread_view_unauthenticated_redirects_to_login(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        thread_url = reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
             'thread_id': thread.id
-        }))
-        self.assertRedirects(response, reverse("home"))
+        })
+        response = self.client.get(thread_url)
+        self.assertRedirects(response, f"/?next={thread_url}")
 
     def test_thread_view_protected_room_without_password(self):
         thread = new_public_thread(self.rooms['protected'], self.user1)
@@ -783,6 +792,7 @@ class ThreadViewTest(TestDataMixin, TestCase):
         self.assertTemplateUsed(response, 'phorum/thread_view.html')
 
     def test_thread_view_shows_all_replies(self):
+        assert self.client.login(username="testclient1", password="password")
         thread = new_public_thread(self.rooms['unpinned1'], self.user1, text="root_post_text")
         reply1 = public_reply(thread, self.user2, text="reply_1_text")
         reply2 = public_reply(thread, self.user1, text="reply_2_text")

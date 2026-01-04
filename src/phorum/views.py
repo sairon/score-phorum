@@ -8,7 +8,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, Paginator
 from django.db.models import Count, Max, Q
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import Http404, HttpResponseForbidden, HttpResponseRedirect
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
@@ -86,6 +86,51 @@ def room_view(request, room_slug):
         'room': room,
         'new_posts': new_posts,
         'threads': threads,
+        'last_visit_time': last_visit_time,
+        'message_form': PublicMessageForm(request.POST or None, author=request.user),
+        'login_form': LoginForm(),
+    })
+
+
+def thread_view(request, room_slug, thread_id):
+    room = get_object_or_404(Room, slug=room_slug)
+
+    if room.protected:
+        if not request.user.is_authenticated:
+            messages.error(request, "Do zaheslovaných místností mají přístup pouze přihlášení uživatelé.")
+            return redirect("home")
+        elif not user_can_view_protected_room(request.user, room):
+            return redirect("room_password_prompt", room_slug=room_slug)
+
+    # get the message with prefetched children - validates it belongs to this room
+    thread = PublicMessage.objects.filter(pk=thread_id, room=room)\
+        .prefetch_related("author", "children__author", "children__recipient",
+                          "room", "children__room",
+                          "deleted_by", "children__deleted_by")\
+        .first()
+
+    if not thread:
+        raise Http404("Thread not found")
+
+    # if this is a reply, redirect to the root thread with anchor
+    if thread.thread_id:
+        return redirect(
+            reverse("thread_view", kwargs={'room_slug': room_slug, 'thread_id': thread.thread_id})
+            + f"#post-{thread_id}"
+        )
+
+    thread.child_messages = list(thread.children.all())
+    thread.last_child = thread.child_messages[-1] if len(thread.child_messages) else None
+
+    last_visit_time = None
+    if request.user.is_authenticated:
+        visit = RoomVisit.objects.filter(user=request.user, room=room).first()
+        if visit:
+            last_visit_time = visit.visit_time
+
+    return render(request, "phorum/thread_view.html", {
+        'room': room,
+        'thread': thread,
         'last_visit_time': last_visit_time,
         'message_form': PublicMessageForm(request.POST or None, author=request.user),
         'login_form': LoginForm(),

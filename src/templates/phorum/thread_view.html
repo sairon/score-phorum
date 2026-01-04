@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load score_tags static %}
+
+{% block title %}{{ room.name }} - vlákno | {% endblock %}
+
+{% block content %}
+  {% if request.user.is_authenticated %}
+    <form class="message-form" action="{% url "message_send" room_slug=room.slug %}" method="post" autocomplete="off">
+      {% csrf_token %}
+      {{ message_form.as_p }}
+      <input type="submit" value="Odeslat">
+    </form>
+  {% endif %}
+
+  <h2 class="room-name"><a href="{% url 'room_view' room_slug=room.slug %}">místnost: {{ room.name }}</a></h2>
+
+  {% include "parts/message.html" with message=thread %}
+
+  <div class="thread-navigation">
+    <a href="{% url 'room_view' room_slug=room.slug %}">&laquo; Zpět do místnosti</a>
+  </div>
+{% endblock %}
+
+{% block extra_body %}
+  <script src="{% static "js/app.js" %}"></script>
+{% endblock %}

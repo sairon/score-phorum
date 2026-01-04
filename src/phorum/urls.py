@@ -20,6 +20,7 @@ urlpatterns = [
     path('inbox/new-message', phorum_views.inbox_send, name="inbox_send"),
     path('room/new', phorum_views.room_new, name="room_new"),
     path('room/<room_slug>/', phorum_views.room_view, name="room_view"),
+    path('room/<room_slug>/thread/<int:thread_id>/', phorum_views.thread_view, name="thread_view"),
     path('room/<room_slug>/password', phorum_views.room_password_prompt, name="room_password_prompt"),
     path('room/<room_slug>/mark-unread', phorum_views.room_mark_unread, name="room_mark_unread"),
     path('room/<room_slug>/edit', phorum_views.room_edit, name="room_edit"),

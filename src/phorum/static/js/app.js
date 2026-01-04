@@ -35,4 +35,16 @@
       }, 300);
     }
   });
+
+  // smooth scroll to anchored post on page load
+  if (window.location.hash) {
+    var target = $(window.location.hash);
+    if (target.length) {
+      setTimeout(function() {
+        $('html, body').animate({
+          scrollTop: target.offset().top - 20
+        }, 300);
+      }, 100);
+    }
+  }
 })(document, window, jQuery);

@@ -1,6 +1,7 @@
 {% load score_tags static %}
 
 <div class="message{% if message.thread %} reply{% endif %}{% if message.author == request.user %} sent{% elif message.recipient == request.user %} received{% else %}{% endif %}{% if request.user.is_authenticated and message|is_newer_than:last_visit_time %} new-message{% endif %}{% if message.deleted %} deleted{% endif %}"
+     id="post-{{ message.pk }}"
      data-thread-id="{{ message.thread_reply_id }}"
      data-author-id="{{ message.author.pk }}"
      data-author="{{ message.author.username }}">
@@ -20,7 +21,7 @@
       </div>
       <div class="recipient"><b>pro:</b> {% if message.recipient %}{{ message.recipient.username }}{% else %}all{% endif %}</div>
       <div class="time" title="{{ message.created }}">
-        {{ message.created|date:"d.m. H:i" }}
+        {% if not message.private %}<a href="{% url 'thread_view' room_slug=message.room.slug thread_id=message.thread_reply_id %}#post-{{ message.pk }}" class="permalink">{% endif %}{{ message.created|date:"d.m. H:i" }}{% if not message.private %}</a>{% endif %}
         {% if request.user.is_admin or not message.deleted and message|can_be_deleted_by:request.user %}
           <a href="{% url "message_delete" message_id=message.id %}{% if message.private %}?inbox=1{% endif %}" class="delete-link-mobile">&times;</a>
         {% endif %}

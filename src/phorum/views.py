@@ -92,6 +92,51 @@ def room_view(request, room_slug):
     })
 
 
+def thread_view(request, room_slug, thread_id):
+    room = get_object_or_404(Room, slug=room_slug)
+
+    if room.protected:
+        if not request.user.is_authenticated:
+            messages.error(request, "Do zaheslovaných místností mají přístup pouze přihlášení uživatelé.")
+            return redirect("home")
+        elif not user_can_view_protected_room(request.user, room):
+            return redirect("room_password_prompt", room_slug=room_slug)
+
+    # get the message - validates it belongs to this room
+    message = get_object_or_404(PublicMessage, pk=thread_id, room=room)
+
+    # if this is a reply, redirect to the root thread with anchor
+    if message.thread_id:
+        return redirect(
+            reverse("thread_view", kwargs={'room_slug': room_slug, 'thread_id': message.thread_id})
+            + f"#post-{thread_id}"
+        )
+
+    # this is a root thread - fetch it with children
+    thread = PublicMessage.objects.filter(pk=thread_id)\
+        .prefetch_related("author", "children__author", "children__recipient",
+                          "room", "children__room",
+                          "deleted_by", "children__deleted_by")\
+        .first()
+
+    thread.child_messages = list(thread.children.all())
+    thread.last_child = thread.child_messages[-1] if len(thread.child_messages) else None
+
+    last_visit_time = None
+    if request.user.is_authenticated:
+        visit = RoomVisit.objects.filter(user=request.user, room=room).first()
+        if visit:
+            last_visit_time = visit.visit_time
+
+    return render(request, "phorum/thread_view.html", {
+        'room': room,
+        'thread': thread,
+        'last_visit_time': last_visit_time,
+        'message_form': PublicMessageForm(request.POST or None, author=request.user),
+        'login_form': LoginForm(),
+    })
+
+
 @sensitive_post_parameters("password")
 @login_required
 def room_password_prompt(request, room_slug):

@@ -697,6 +697,94 @@ class InboxText(TestDataMixin, TestCase):
 
 
 @override_settings(USE_TZ=False)
+class ThreadViewTest(TestDataMixin, TestCase):
+
+    def test_thread_view_returns_200_for_root_thread(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertEqual(response.status_code, 200)
+
+    def test_thread_view_uses_correct_template(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertTemplateUsed(response, 'phorum/thread_view.html')
+
+    def test_thread_view_context_contains_thread(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertEqual(response.context['thread'], thread)
+
+    def test_thread_view_reply_id_redirects_to_root_with_anchor(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        reply = public_reply(thread, self.user2)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': reply.id
+        }))
+        expected_url = reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': thread.id
+        }) + f'#post-{reply.id}'
+        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
+
+    def test_thread_view_404_for_nonexistent_thread(self):
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': 99999
+        }))
+        self.assertEqual(response.status_code, 404)
+
+    def test_thread_view_404_for_wrong_room(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1)
+        # Try to access thread from unpinned1 via unpinned2's slug
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned2'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertEqual(response.status_code, 404)
+
+    def test_thread_view_protected_room_unauthenticated(self):
+        thread = new_public_thread(self.rooms['protected'], self.user1)
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['protected'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertRedirects(response, reverse("home"))
+
+    def test_thread_view_protected_room_without_password(self):
+        thread = new_public_thread(self.rooms['protected'], self.user1)
+        assert self.client.login(username="testclient1", password="password")
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['protected'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertRedirects(response, reverse("room_password_prompt", kwargs={
+            'room_slug': self.rooms['protected'].slug
+        }))
+
+    def test_thread_view_shows_all_replies(self):
+        thread = new_public_thread(self.rooms['unpinned1'], self.user1, text="root_post_text")
+        reply1 = public_reply(thread, self.user2, text="reply_1_text")
+        reply2 = public_reply(thread, self.user1, text="reply_2_text")
+        response = self.client.get(reverse("thread_view", kwargs={
+            'room_slug': self.rooms['unpinned1'].slug,
+            'thread_id': thread.id
+        }))
+        self.assertContains(response, "root_post_text")
+        self.assertContains(response, "reply_1_text")
+        self.assertContains(response, "reply_2_text")
+
+
+@override_settings(USE_TZ=False)
 class AuthenticationTest(TestDataMixin, TestCase):
 
     def test_login(self):

@@ -1,7 +1,7 @@
 .message
   font-family: Tahoma, Arial, Helvetica, sans-serif
   color: #333
-  +pie-clearfix
+  display: flow-root
   position: relative
 
   .avatar
@@ -90,7 +90,7 @@
     &.in-thread
       background-color: $message-meta-highlight-color
 
-  +breakpoint($mobile-breakpoint)
+  +breakpoint($mobile-break-width)
     .avatar
       left: 0
 

@@ -5,16 +5,16 @@ html
   box-sizing: inherit
 
 body
-  background: #94ada5 inline_image("bgpattern.gif")
+  background: #94ada5 url("img/bgpattern.gif")
   padding: 1em 0.2em
 
-  +breakpoint($mobile-breakpoint)
+  +breakpoint($mobile-break-width)
     padding: 2em
 
 #content
   margin: 0 auto
 
-  +breakpoint($mobile-breakpoint)
+  +breakpoint($mobile-break-width)
     width: 80%
     min-width: 50em
 

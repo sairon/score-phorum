@@ -6,4 +6,8 @@ $message-meta-highlight-color: #e8e28d
 $message-meta-target-color: #a8d8ea
 
 $mobile-break-width: 640px
-$mobile-breakpoint: screen and (min-width $mobile-break-width)
+
+// Breakpoint mixin (replaces breakpoint library)
+=breakpoint($min-width)
+  @media screen and (min-width: $min-width)
+    @content

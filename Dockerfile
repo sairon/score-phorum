@@ -1,5 +1,5 @@
 # Sass -> CSS build
-FROM node:24-slim AS sass
+FROM node:25-slim AS sass
 
 WORKDIR /usr/src/app
 

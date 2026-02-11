@@ -279,7 +279,7 @@ class PublicMessage(Message):
             self.author.decrease_kredyti(kredyti_penalty)
 
             now = timezone.now()
-            in_delete_period = (now - self.created).seconds < settings.ACTUAL_DELETE_PERIOD_SECONDS
+            in_delete_period = (now - self.created).total_seconds() < settings.ACTUAL_DELETE_PERIOD_SECONDS
 
             if user.is_admin:
                 self.delete()

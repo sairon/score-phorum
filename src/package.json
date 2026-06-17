@@ -4,7 +4,7 @@
     "modern-normalize": "^3.0.1"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "postcss": "^8.5.14",
     "postcss-cli": "^11.0.0",
     "postcss-import": "^16.1.1",

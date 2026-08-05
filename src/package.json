@@ -5,7 +5,7 @@
   },
   "devDependencies": {
     "concurrently": "^10.0.3",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.25",
     "postcss-cli": "^11.0.0",
     "postcss-import": "^16.1.1",
     "postcss-url": "^10.1.3",

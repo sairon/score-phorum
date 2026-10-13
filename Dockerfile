@@ -12,7 +12,7 @@ COPY ./src/phorum/static ./phorum/static
 RUN npm run sass
 
 # Python build
-FROM python:3.14.7-slim AS build
+FROM python:3.14.8-slim AS build
 
 ARG mode=production
 
@@ -57,7 +57,7 @@ RUN \
     make collectstatic
 
 # Final image
-FROM python:3.14.7-slim
+FROM python:3.14.8-slim
 
 ARG mode=production
 
